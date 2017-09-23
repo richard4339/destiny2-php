@@ -1,0 +1,24 @@
+{
+  "name": "richard4339/destiny2-php",
+  "type": "library",
+  "description": "PHP wrapper for the Destiny 2 API",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Richard",
+      "email": "richard@mozor.net"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Destiny\\": "src/"
+    }
+  },
+  "require": {
+    "php": ">=7.0",
+    "nategood/httpful": "*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^5"
+  }
+}
