@@ -26,8 +26,65 @@
 
 namespace Destiny;
 
+use Destiny\Exceptions\ClientException;
+use Destiny\Objects\GroupMember;
+use Httpful\Request;
+use Httpful\Response;
+
 
 class Client
 {
+    /**
+     * 
+     */
+    const URI = "https://www.bungie.net/Platform";
+
+    /**
+     * @var string $apiKey
+     */
+    public $apiKey;
+    
+    function __construct($apiKey)
+    {
+        $this->apiKey = $apiKey;
+    }
+
+    /**
+     * @param string $endpoint
+     * @param array|null $uriParams
+     * @param array|null $queryParams
+     * @return string
+     */
+    protected function _buildRequestString($endpoint, array $uriParams = null, array $queryParams = null) {
+        return sprintf("%s/%s/%s/?%s", self::URI, $endpoint, implode("/", $uriParams), http_build_query($queryParams));
+    }
+
+    /**
+     * @param string $uri
+     * @return object
+     * @throws ClientException
+     */
+    protected function getResponse($uri) {
+        $response = Request::get($uri)->addHeader('X-API-Key', $this->apiKey)->send()->body;
+
+        if($response->ErrorStatus != "Success") {
+            throw new ClientException();
+        }
+
+        return $response->Response;
+    }
+
+    /**
+     * @param $clanID
+     * @param int $currentPage
+     * @return GroupMember[]
+     *
+     * @link https://bungie-net.github.io/multi/operation_get_GroupV2-GetMembersOfGroup.html#operation_get_GroupV2-GetMembersOfGroup
+     */
+    public function getClanMembers($clanID, $currentPage = 1) {
+        $response = $this->getResponse($this->_buildRequestString('GroupV2', [$clanID, 'Members'], ['currentPage' => $currentPage]));
+
+        return $response->results;
+    }
 
 }
