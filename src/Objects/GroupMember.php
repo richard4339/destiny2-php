@@ -26,16 +26,26 @@
 
 namespace Destiny\Objects;
 
+use Destiny\AbstractResource;
+use JsonSerializable;
+
 /**
  * Class GroupMember
  * @package Destiny\Objects
  *
- * @property-read int $memberType
- * @property-read bool $isOnline
- * @property-read string $groupId
- * @property-read string $joinDate
+ * @method int memberType()
+ * @method bool isOnline()
+ * @method string groupId()
+ * @method string joinDate()
+ * @method DestinyUserInfo destinyUserInfo()
+ * @method BungieNetUserInfo bungieNetUserInfo()
  */
-class GroupMember
+class GroupMember extends AbstractResource
 {
+
+    protected $casts = [
+        'destinyUserInfo' => DestinyUserInfo::class,
+        'bungieNetUserInfo' => BungieNetUserInfo::class
+    ];
 
 }

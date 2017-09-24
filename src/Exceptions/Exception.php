@@ -13,10 +13,10 @@
 namespace Destiny\Exceptions;
 
 /**
- * Class ClientException
+ * Class Exception
  * @package Destiny\Exceptions
  */
-class ClientException extends Exception
+class Exception extends \Exception
 {
 
 }

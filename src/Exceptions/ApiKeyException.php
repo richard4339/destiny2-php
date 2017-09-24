@@ -13,10 +13,10 @@
 namespace Destiny\Exceptions;
 
 /**
- * Class ClientException
+ * Class ClientIDException
  * @package Destiny\Exceptions
  */
-class ClientException extends Exception
+class ApiKeyException extends Exception
 {
 
 }
