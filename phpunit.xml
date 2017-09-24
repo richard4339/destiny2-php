@@ -16,7 +16,7 @@
     </php>
     <testsuites>
         <testsuite name="Destiny Class">
-            <directory suffix="Test.php">./tests</directory>
+            <file>tests/GroupTest.php</file>
         </testsuite>
     </testsuites>
 </phpunit>
