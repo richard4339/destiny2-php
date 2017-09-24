@@ -159,8 +159,6 @@ composer.phar
 /web/uploads/
 
 # PHPUnit
-/app/phpunit.xml
-/phpunit.xml
 
 # Build data
 /build/
