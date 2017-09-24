@@ -1,0 +1,182 @@
+{
+  "Response": {
+    "results": [
+      {
+        "memberType": 3,
+        "isOnline": false,
+        "groupId": "2114315",
+        "destinyUserInfo": {
+          "iconPath": "/img/theme/destiny/icons/icon_psn.png",
+          "membershipType": 2,
+          "membershipId": "4611686018460479809",
+          "displayName": "Soizit_Blindy"
+        },
+        "bungieNetUserInfo": {
+          "supplementalDisplayName": "Soizit Blindy",
+          "iconPath": "/img/profile/avatars/e2015_11.jpg",
+          "membershipType": 254,
+          "membershipId": "243734",
+          "displayName": "Soizit Blindy"
+        },
+        "joinDate": "2017-08-30T00:21:20Z"
+      },
+      {
+        "memberType": 3,
+        "isOnline": false,
+        "groupId": "2114315",
+        "destinyUserInfo": {
+          "iconPath": "/img/theme/destiny/icons/icon_psn.png",
+          "membershipType": 2,
+          "membershipId": "4611686018428812962",
+          "displayName": "graze81"
+        },
+        "bungieNetUserInfo": {
+          "supplementalDisplayName": "4610432",
+          "iconPath": "/img/profile/avatars/cc45.jpg",
+          "membershipType": 254,
+          "membershipId": "4610432",
+          "displayName": "graze81"
+        },
+        "joinDate": "2017-08-30T19:21:39Z"
+      },
+      {
+        "memberType": 3,
+        "isOnline": false,
+        "groupId": "2114315",
+        "destinyUserInfo": {
+          "iconPath": "/img/theme/destiny/icons/icon_psn.png",
+          "membershipType": 2,
+          "membershipId": "4611686018428698365",
+          "displayName": "BriarRabbit"
+        },
+        "bungieNetUserInfo": {
+          "supplementalDisplayName": "4327633",
+          "iconPath": "/img/profile/avatars/odst_skull_8_4.png",
+          "membershipType": 254,
+          "membershipId": "4327633",
+          "displayName": "BriarRabbit"
+        },
+        "joinDate": "2017-08-29T20:40:40Z"
+      },
+      {
+        "memberType": 5,
+        "isOnline": false,
+        "groupId": "2114315",
+        "destinyUserInfo": {
+          "iconPath": "/img/theme/destiny/icons/icon_psn.png",
+          "membershipType": 2,
+          "membershipId": "4611686018439486087",
+          "displayName": "richard4339"
+        },
+        "bungieNetUserInfo": {
+          "supplementalDisplayName": "richard4339",
+          "iconPath": "/img/profile/avatars/e2015_13.jpg",
+          "membershipType": 254,
+          "membershipId": "8628538",
+          "displayName": "MrGoodBytes"
+        },
+        "joinDate": "2017-08-29T20:31:20Z"
+      },
+      {
+        "memberType": 3,
+        "isOnline": false,
+        "groupId": "2114315",
+        "destinyUserInfo": {
+          "iconPath": "/img/theme/destiny/icons/icon_xbl.png",
+          "membershipType": 1,
+          "membershipId": "4611686018429637522",
+          "displayName": "BriarRabbit"
+        },
+        "bungieNetUserInfo": {
+          "supplementalDisplayName": "4327633",
+          "iconPath": "/img/profile/avatars/odst_skull_8_4.png",
+          "membershipType": 254,
+          "membershipId": "4327633",
+          "displayName": "BriarRabbit"
+        },
+        "joinDate": "2017-08-29T20:40:35Z"
+      },
+      {
+        "memberType": 3,
+        "isOnline": false,
+        "groupId": "2114315",
+        "destinyUserInfo": {
+          "iconPath": "/img/theme/destiny/icons/icon_psn.png",
+          "membershipType": 2,
+          "membershipId": "4611686018428587994",
+          "displayName": "muju_da_beast94"
+        },
+        "bungieNetUserInfo": {
+          "supplementalDisplayName": "MUJU",
+          "iconPath": "https://halo.bungie.net/Stats/emblem.ashx?s=90&0=18&1=29&2=22&3=22&fi=12&bi=11&fl=1&m=3",
+          "membershipType": 254,
+          "membershipId": "1867562",
+          "displayName": "muju da beast94"
+        },
+        "joinDate": "2017-08-29T23:59:21Z"
+      },
+      {
+        "memberType": 3,
+        "isOnline": false,
+        "groupId": "2114315",
+        "destinyUserInfo": {
+          "iconPath": "/img/theme/destiny/icons/icon_psn.png",
+          "membershipType": 2,
+          "membershipId": "4611686018438581367",
+          "displayName": "GaryDiaz86"
+        },
+        "bungieNetUserInfo": {
+          "supplementalDisplayName": "11728544",
+          "iconPath": "/img/profile/avatars/Destiny12.jpg",
+          "membershipType": 254,
+          "membershipId": "11728544",
+          "displayName": "GaryDiaz86"
+        },
+        "joinDate": "2017-09-01T23:51:12Z"
+      },
+      {
+        "memberType": 3,
+        "isOnline": false,
+        "groupId": "2114315",
+        "destinyUserInfo": {
+          "iconPath": "/img/theme/destiny/icons/icon_xbl.png",
+          "membershipType": 1,
+          "membershipId": "4611686018458016792",
+          "displayName": "GaryDiaz86"
+        },
+        "joinDate": "2017-09-01T23:51:20Z"
+      },
+      {
+        "memberType": 3,
+        "isOnline": false,
+        "groupId": "2114315",
+        "destinyUserInfo": {
+          "iconPath": "/img/theme/destiny/icons/icon_psn.png",
+          "membershipType": 2,
+          "membershipId": "4611686018436266142",
+          "displayName": "TheSkinnyChoctaw"
+        },
+        "bungieNetUserInfo": {
+          "supplementalDisplayName": "6016875",
+          "iconPath": "/img/profile/avatars/Destiny24.jpg",
+          "membershipType": 254,
+          "membershipId": "6016875",
+          "displayName": "TheSkinnyChoctaw"
+        },
+        "joinDate": "2017-09-06T14:28:27Z"
+      }
+    ],
+    "totalResults": 9,
+    "hasMore": false,
+    "query": {
+      "itemsPerPage": 100,
+      "currentPage": 1
+    },
+    "useTotalResults": true
+  },
+  "ErrorCode": 1,
+  "ThrottleSeconds": 0,
+  "ErrorStatus": "Success",
+  "Message": "Ok",
+  "MessageData": {}
+}

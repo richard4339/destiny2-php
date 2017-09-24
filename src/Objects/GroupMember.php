@@ -27,6 +27,7 @@
 namespace Destiny\Objects;
 
 use Destiny\AbstractResource;
+use Destiny\Enums\RuntimeGroupMemberType;
 use JsonSerializable;
 
 /**
@@ -47,5 +48,12 @@ class GroupMember extends AbstractResource
         'destinyUserInfo' => DestinyUserInfo::class,
         'bungieNetUserInfo' => BungieNetUserInfo::class
     ];
+
+    /**
+     * @return string
+     */
+    public function memberTypeLabel() {
+        return RuntimeGroupMemberType::getLabel($this->memberType());
+    }
 
 }

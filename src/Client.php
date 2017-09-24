@@ -39,7 +39,7 @@ use GuzzleHttp\Client as GuzzleClient;
 class Client
 {
     /**
-     * 
+     *
      */
     const URI = "https://www.bungie.net/Platform";
 
@@ -61,11 +61,11 @@ class Client
     function __construct($apiKey = '')
     {
         if (empty($apiKey)) {
-            $apiKey = $_ENV["CLIENTID"];
+            $apiKey = $_ENV["APIKEY"];
         }
 
-        if(empty($apiKey)) {
-            throw new ApiKeyException("Client ID is not set");
+        if (empty($apiKey)) {
+            throw new ApiKeyException("API Key is not set");
         }
 
         $this->_apiKey = $apiKey;
@@ -93,37 +93,31 @@ class Client
 
     /**
      * @param string $url
-     * @return array
+     * @return mixed
      * @throws ApiKeyException
-     * @throws GuzzleClientException
+     * @throws ClientException
      */
     protected function request($url)
     {
-        try {
-            $reponse = $this->getHttpClient()
-                ->request('GET', $url, [
-                    'headers' => [
-                        'X-Api-Key' => $this->_apiKey
-                    ]
-                ]);
 
-            return ResponseMediator::convertResponseToArray($reponse);
-        } catch (GuzzleClientException $x) {
-            switch($x->getCode()) {
-                case 400:
-                    $response = $x->getResponse();
-                    $body = ResponseMediator::convertResponseToArray($response);
-                    if($body['message'] == 'Invalid client id specified') {
-                        throw new ApiKeyException('Invalid client id specified');
-                    } else {
-                        throw $x;
-                    }
-                    break;
-                default:
-                    throw $x;
-                    break;
-            }
+        if (empty($this->_apiKey)) {
+            throw new ApiKeyException("API Key is not set");
         }
+
+        $response = $this->getHttpClient()
+            ->request('GET', $url, [
+                'headers' => [
+                    'X-Api-Key' => $this->_apiKey
+                ]
+            ]);
+
+        $body = ResponseMediator::convertResponseToArray($response);
+
+        if ($body['ErrorCode'] != 1) {
+            throw new ClientException($body['Message'], $body['ErrorCode'], $body['ThrottleSeconds'], $body['ErrorStatus']);
+        }
+
+        return $body;
     }
 
     /**
@@ -144,7 +138,8 @@ class Client
      * @param array|null $queryParams
      * @return string
      */
-    protected function _buildRequestString($endpoint, array $uriParams = null, array $queryParams = null) {
+    protected function _buildRequestString($endpoint, array $uriParams = null, array $queryParams = null)
+    {
         return sprintf("%s/%s/%s/?%s", self::URI, $endpoint, implode("/", $uriParams), http_build_query($queryParams));
     }
 
@@ -155,8 +150,10 @@ class Client
      *
      * @link https://bungie-net.github.io/multi/operation_get_GroupV2-GetMembersOfGroup.html#operation_get_GroupV2-GetMembersOfGroup
      */
-    public function getClanMembers($clanID, $currentPage = 1) {
-        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'Members'], ['currentPage' => $currentPage]));
+    public function getClanMembers($clanID, $currentPage = 1)
+    {
+        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'Members'],
+            ['currentPage' => $currentPage]));
 
         return array_map(function ($item) {
             return GroupMember::makeFromArray($item);
@@ -170,8 +167,10 @@ class Client
      *
      * @link https://bungie-net.github.io/multi/operation_get_GroupV2-GetAdminsAndFounderOfGroup.html#operation_get_GroupV2-GetAdminsAndFounderOfGroup
      */
-    public function getClanAdminsAndFounder($clanID, $currentPage = 1) {
-        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'AdminsAndFounder'], ['currentPage' => $currentPage]));
+    public function getClanAdminsAndFounder($clanID, $currentPage = 1)
+    {
+        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'AdminsAndFounder'],
+            ['currentPage' => $currentPage]));
 
         return array_map(function ($item) {
             return GroupMember::makeFromArray($item);
@@ -187,8 +186,10 @@ class Client
      *
      * @todo Requires OAuth which is not yet implemented
      */
-    public function getClanBannedMembers($clanID, $currentPage = 1) {
-        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'AdminsAndFounder'], ['currentPage' => $currentPage]));
+    public function getClanBannedMembers($clanID, $currentPage = 1)
+    {
+        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'AdminsAndFounder'],
+            ['currentPage' => $currentPage]));
 
         return array_map(function ($item) {
             return GroupMember::makeFromArray($item);
@@ -204,8 +205,10 @@ class Client
      *
      * @todo Requires OAuth which is not yet implemented
      */
-    public function getClanPendingMembers($clanID, $currentPage = 1) {
-        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'AdminsAndFounder'], ['currentPage' => $currentPage]));
+    public function getClanPendingMembers($clanID, $currentPage = 1)
+    {
+        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'AdminsAndFounder'],
+            ['currentPage' => $currentPage]));
 
         return array_map(function ($item) {
             return GroupMember::makeFromArray($item);
@@ -221,8 +224,10 @@ class Client
      *
      * @todo Requires OAuth which is not yet implemented
      */
-    public function getClanInvitedMembers($clanID, $currentPage = 1) {
-        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'AdminsAndFounder'], ['currentPage' => $currentPage]));
+    public function getClanInvitedMembers($clanID, $currentPage = 1)
+    {
+        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'AdminsAndFounder'],
+            ['currentPage' => $currentPage]));
 
         return array_map(function ($item) {
             return GroupMember::makeFromArray($item);
