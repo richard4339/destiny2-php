@@ -145,6 +145,21 @@ class Client
 
     /**
      * @param $clanID
+     * @return Group
+     *
+     * @link https://bungie-net.github.io/multi/operation_get_GroupV2-GetGroup.html#operation_get_GroupV2-GetGroup
+     */
+    public function getClan($clanID)
+    {
+        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID]));
+
+        return array_map(function ($item) {
+            return Group::makeFromArray($item);
+        }, $response['Response']['results']);
+    }
+
+    /**
+     * @param $clanID
      * @param int $currentPage
      * @return GroupMember[]
      *
