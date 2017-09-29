@@ -1,22 +1,22 @@
 <?php
 /**
- * pipsqueek-discord
+ * destiny2-php
  * @author Richard Lynskey <richard@mozor.net>
  * @copyright Copyright (c) 2017, Richard Lynskey
  * @license http://www.gnu.org/licenses/ GPLv3
  * @version 0.1
  *
- * Built 2017-09-23 10:17 CDT by richard
+ * Built 2017-09-30 12:18 CDT by richard
  *
  */
 
 namespace Destiny\Exceptions;
 
 /**
- * Class ClientIDException
+ * Class OAuthException
  * @package Destiny\Exceptions
  */
-class ApiKeyException extends ClientException
+class OAuthException extends Exception
 {
 
 }

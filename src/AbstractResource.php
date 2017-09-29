@@ -37,6 +37,9 @@
 
 namespace Destiny;
 
+use DateTime;
+use DateTimeZone;
+
 /**
  * Class AbstractResource
  * @package Destiny
@@ -47,8 +50,9 @@ abstract class AbstractResource
 {
     protected $data = [];
     protected $casts = [];
+    protected $dates = [];
 
-    const TIMEZONE = 'GMT';
+    const TIMEZONE = 'UTC';
 
     /**
      * AbstractResource constructor.
@@ -157,9 +161,52 @@ abstract class AbstractResource
      */
     public function __call($name, $arguments)
     {
+        if(in_array($name, $this->dates)) {
+            return $this->getDateTime($name, $arguments);
+        }
         if($data = $this->get($name))
         {
             return $data;
         }
+    }
+
+    /**
+     * Gets the supplied key's data as a datetime in UTC
+     *
+     * @param string|null $key
+     * @param string $tz TimeZone string from the mentioned link
+     * @return bool|DateTime
+     * 
+     * @link https://secure.php.net/manual/en/timezones.php
+     */
+    public function getDateTime($key = null, $tz = null)
+    {
+
+        $string = $this->get($key);
+
+        if(empty($string)) {
+            return false;
+        }
+
+        if(is_array($tz)) {
+            if(!empty($tz)) {
+                $tz = $tz[0];
+            } else {
+                $tz = null;
+            }
+        } elseif (!is_string($tz)) {
+            $tz = null;
+        }
+
+        $date = new DateTime($string);
+        $date->setTimezone(new DateTimeZone(self::TIMEZONE));
+
+        $timezone = new DateTimeZone($tz ?? self::TIMEZONE);
+
+        if($date->getTimezone()->getName() != $timezone->getName()) {
+            $date->setTimezone($timezone);
+        }
+
+        return $date;
     }
 }

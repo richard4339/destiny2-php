@@ -28,9 +28,14 @@ namespace Destiny;
 
 use Destiny\Exceptions\ClientException;
 use Destiny\Exceptions\ApiKeyException;
+use Destiny\Exceptions\OAuthException;
+use Destiny\Objects\GeneralUser;
 use Destiny\Objects\GroupMember;
 use GuzzleHttp\Exception\ClientException as GuzzleClientException;
 use GuzzleHttp\Client as GuzzleClient;
+use GuzzleHttp\Psr7\Response;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
 
 /**
  * Class Client
@@ -49,16 +54,22 @@ class Client
     protected $_apiKey;
 
     /**
-     * @var GuzzleClient $httpClient
+     * @var string Destiny OAuth Token
      */
-    public $httpClient;
+    protected $_oauthToken;
+
+    /**
+     * @var GuzzleClient $_httpClient
+     */
+    protected $_httpClient;
 
     /**
      * Client constructor.
      * @param string $apiKey
+     * @param null $token
      * @throws ApiKeyException
      */
-    function __construct($apiKey = '')
+    function __construct($apiKey = '', $token = null)
     {
         if (empty($apiKey)) {
             $apiKey = $_ENV["APIKEY"];
@@ -69,6 +80,10 @@ class Client
         }
 
         $this->_apiKey = $apiKey;
+
+        if (!empty($token)) {
+            $this->_oauthToken = $token;
+        }
     }
 
     /**
@@ -96,6 +111,7 @@ class Client
      * @return mixed
      * @throws ApiKeyException
      * @throws ClientException
+     * @throws OAuthException
      */
     protected function request($url)
     {
@@ -104,20 +120,42 @@ class Client
             throw new ApiKeyException("API Key is not set");
         }
 
-        $response = $this->getHttpClient()
-            ->request('GET', $url, [
-                'headers' => [
-                    'X-Api-Key' => $this->_apiKey
-                ]
-            ]);
+        $headers = [
+            'X-Api-Key' => $this->_apiKey
+        ];
+
+        if (!empty($this->_oauthToken)) {
+            $headers['Authorization'] = sprintf('Bearer %s', $this->_oauthToken);
+        }
+
+        try {
+            $response = $this->getHttpClient()
+                ->request('GET', $url, [
+                    'headers' => $headers
+                ]);
+        } catch (GuzzleClientException $x) {
+            switch ($x->getCode()) {
+                case 401:
+                    throw new OAuthException('401 Unauthorized');
+                    break;
+            }
+        }
 
         $body = ResponseMediator::convertResponseToArray($response);
 
-        if ($body['ErrorCode'] != 1) {
-            throw new ClientException($body['Message'], $body['ErrorCode'], $body['ThrottleSeconds'], $body['ErrorStatus']);
+        switch ($body['ErrorCode']) {
+            case 1:
+                return $body;
+                break;
+            case 2101:
+                throw new ApiKeyException($body['Message'], $body['ErrorCode'], $body['ThrottleSeconds'],
+                    $body['ErrorStatus']);
+                break;
+            default:
+                throw new ClientException($body['Message'], $body['ErrorCode'], $body['ThrottleSeconds'],
+                    $body['ErrorStatus']);
+                break;
         }
-
-        return $body;
     }
 
     /**
@@ -125,11 +163,11 @@ class Client
      */
     protected function getHttpClient()
     {
-        if ($this->httpClient === null) {
-            $this->httpClient = new GuzzleClient(['base_uri' => self::URI, 'verify' => false]);
+        if ($this->_httpClient === null) {
+            $this->_httpClient = new GuzzleClient(['base_uri' => self::URI, 'verify' => false]);
         }
 
-        return $this->httpClient;
+        return $this->_httpClient;
     }
 
     /**
@@ -140,22 +178,11 @@ class Client
      */
     protected function _buildRequestString($endpoint, array $uriParams = null, array $queryParams = null)
     {
-        return sprintf("%s/%s/%s/?%s", self::URI, $endpoint, implode("/", $uriParams), http_build_query($queryParams));
-    }
-
-    /**
-     * @param $clanID
-     * @return Group
-     *
-     * @link https://bungie-net.github.io/multi/operation_get_GroupV2-GetGroup.html#operation_get_GroupV2-GetGroup
-     */
-    public function getClan($clanID)
-    {
-        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID]));
-
-        return array_map(function ($item) {
-            return Group::makeFromArray($item);
-        }, $response['Response']['results']);
+        $query = '';
+        if (!empty($queryParams)) {
+            $query = http_build_query($queryParams);
+        }
+        return sprintf("%s/%s/%s/?%s", self::URI, $endpoint, implode("/", $uriParams), $query);
     }
 
     /**
@@ -247,6 +274,56 @@ class Client
         return array_map(function ($item) {
             return GroupMember::makeFromArray($item);
         }, $response['Response']['results']);
+    }
+
+    /**
+     * @return GeneralUser
+     * @throws ApiKeyException
+     * @throws ClientException
+     * @throws OAuthException
+     */
+    public function getCurrentBungieUser()
+    {
+        if (empty($this->_oauthToken)) {
+            throw new OAuthException('401 Unauthorized');
+        }
+        $response = $this->request($this->_buildRequestString('User', ['GetCurrentBungieNetUser']));
+
+        return GeneralUser::makeFromArray($response['Response']);
+    }
+
+    /**
+     * @param int $userID
+     * @return GeneralUser
+     * @throws ApiKeyException
+     * @throws ClientException
+     *
+     * @link https://bungie-net.github.io/multi/operation_get_User-GetBungieNetUserById.html#operation_get_User-GetBungieNetUserById
+     */
+    public function getBungieUser($userID)
+    {
+        $response = $this->request($this->_buildRequestString('User', ['GetBungieNetUserById', $userID]));
+
+        return GeneralUser::makeFromArray($response['Response']);
+    }
+
+
+    /**
+     * Shim for testing the API
+     *
+     * @param string $responseFile
+     * @param int $statusCode HTTP Response Code (Defaults to 200)
+     */
+    public function setMock($responseFile, $statusCode = 200)
+    {
+
+
+        $mock = new MockHandler([
+            new Response($statusCode, ['Content-Type' => 'application/json'], file_get_contents($responseFile))
+        ]);
+
+        $handler = HandlerStack::create($mock);
+        $this->_httpClient = new GuzzleClient(['handler' => $handler]);
     }
 
 }

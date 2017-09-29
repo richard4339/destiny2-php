@@ -1,0 +1,7 @@
+{
+  "ErrorCode": 205,
+  "ThrottleSeconds": 0,
+  "ErrorStatus": "UserCannotFindRequestedUser",
+  "Message": "The requested user could not be found.",
+  "MessageData": {}
+}

@@ -16,36 +16,25 @@ class GroupTest extends PHPUnit_Framework_TestCase
     const TEST_CLANID = "2114315";
 
     /**
-     * @expectedException Error
+     * @expectedException \Destiny\Exceptions\ApiKeyException
      */
     public function testInvalidAPIKey()
     {
-        $client = $this->createClient(__DIR__ . '/static/invalidApiKey.json');
+        $client = new Client(self::TEST_API_KEY);
+        $client->setMock(__DIR__ . '/static/invalidApiKey.json');
 
         $client->getClanMembers(self::TEST_CLANID);
     }
 
     /**
-     * Creates the Client class instance for mockups
-     *
-     * @param $responseFile
-     * @param int $statusCode HTTP Response Code (Defaults to 200)
-     * @return Client
+     * @expectedException \Destiny\Exceptions\OAuthException
      */
-    public function createClient($responseFile, $statusCode = 200) {
-
-
-        $mock = new MockHandler([
-            new Response($statusCode, ['Content-Type' => 'application/json'], file_get_contents($responseFile))
-        ]);
-
-        $handler = HandlerStack::create($mock);
-        $client = new GuzzleClient(['handler' => $handler]);
-
+    public function testInvalidOAuthKey()
+    {
         $client = new Client(self::TEST_API_KEY);
-        $client->httpClient = $client;
+        $client->setMock(__DIR__ . '/static/invalidApiKey.json', 401);
 
-        return $client;
+        $client->getCurrentBungieUser();
     }
 
 }
