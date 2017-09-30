@@ -8,7 +8,6 @@
  *
  * Built 2017-09-28 12:18 CDT by richard
  *
- *
  */
 
 namespace Destiny\Objects;
@@ -55,6 +54,9 @@ use Destiny\AbstractResource;
 class GeneralUser extends AbstractResource
 {
 
+    /**
+     * @var array Array of string columns that will need to be converted to dates using getDateTime() in lieu of get()
+     */
     protected $dates = ['firstAccess', 'lastUpdate', 'statusDate'];
 
 }

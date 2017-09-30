@@ -30,6 +30,9 @@ use JsonSerializable;
 class GroupMember extends AbstractResource
 {
 
+    /**
+     * @var array Array of columns that will need to be casted to their own class
+     */
     protected $casts = [
         'destinyUserInfo' => DestinyUserInfo::class,
         'bungieNetUserInfo' => BungieNetUserInfo::class
