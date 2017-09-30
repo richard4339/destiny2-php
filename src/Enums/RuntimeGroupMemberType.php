@@ -28,7 +28,7 @@ class RuntimeGroupMemberType
     const FOUNDER = 5;
 
     /**
-     * @param $type
+     * @param int $type
      * @return string
      */
     public static function getLabel($type) {

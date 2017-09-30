@@ -12,11 +12,13 @@
 
 namespace Destiny;
 
+use Destiny\Enums\GroupType;
 use Destiny\Exceptions\ClientException;
 use Destiny\Exceptions\ApiKeyException;
 use Destiny\Exceptions\OAuthException;
 use Destiny\Objects\GeneralUser;
 use Destiny\Objects\GroupMember;
+use Destiny\Objects\GroupResponse;
 use GuzzleHttp\Exception\ClientException as GuzzleClientException;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Psr7\Response;
@@ -169,6 +171,26 @@ class Client
             $query = http_build_query($queryParams);
         }
         return sprintf("%s/%s/%s/?%s", self::URI, $endpoint, implode("/", $uriParams), $query);
+    }
+
+    /**
+     * @param string|int $group
+     * @param int $groupType
+     * @return GroupResponse
+     * @throws ApiKeyException
+     * @throws ClientException
+     *
+     * @link https://bungie-net.github.io/multi/operation_get_GroupV2-GetGroupByName.html#operation_get_GroupV2-GetGroupByName
+     * @link https://bungie-net.github.io/multi/operation_get_GroupV2-GetGroup.html#operation_get_GroupV2-GetGroup
+     */
+    public function getGroup($group, $groupType = GroupType::CLAN)
+    {
+        if(is_integer($group)) {
+            $response = $this->request($this->_buildRequestString('GroupV2', [$group]));
+        } else {
+            $response = $this->request($this->_buildRequestString('GroupV2', ['Name', $group, $groupType]));
+        }
+        return GroupResponse::makeFromArray($response['Response']);
     }
 
     /**
