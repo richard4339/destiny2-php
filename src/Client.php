@@ -220,63 +220,6 @@ class Client
     }
 
     /**
-     * @param $clanID
-     * @param int $currentPage
-     * @return GroupMember[]
-     *
-     * @link https://bungie-net.github.io/multi/operation_get_GroupV2-GetBannedMembersOfGroup.html#operation_get_GroupV2-GetBannedMembersOfGroup
-     *
-     * @todo Requires OAuth which is not yet implemented
-     */
-    public function getClanBannedMembers($clanID, $currentPage = 1)
-    {
-        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'AdminsAndFounder'],
-            ['currentPage' => $currentPage]));
-
-        return array_map(function ($item) {
-            return GroupMember::makeFromArray($item);
-        }, $response['Response']['results']);
-    }
-
-    /**
-     * @param $clanID
-     * @param int $currentPage
-     * @return GroupMember[]
-     *
-     * @link https://bungie-net.github.io/multi/operation_get_GroupV2-GetPendingMemberships.html#operation_get_GroupV2-GetPendingMemberships
-     *
-     * @todo Requires OAuth which is not yet implemented
-     */
-    public function getClanPendingMembers($clanID, $currentPage = 1)
-    {
-        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'AdminsAndFounder'],
-            ['currentPage' => $currentPage]));
-
-        return array_map(function ($item) {
-            return GroupMember::makeFromArray($item);
-        }, $response['Response']['results']);
-    }
-
-    /**
-     * @param $clanID
-     * @param int $currentPage
-     * @return GroupMember[]
-     *
-     * @link https://bungie-net.github.io/multi/operation_get_GroupV2-GetInvitedIndividuals.html#operation_get_GroupV2-GetInvitedIndividuals
-     *
-     * @todo Requires OAuth which is not yet implemented
-     */
-    public function getClanInvitedMembers($clanID, $currentPage = 1)
-    {
-        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'AdminsAndFounder'],
-            ['currentPage' => $currentPage]));
-
-        return array_map(function ($item) {
-            return GroupMember::makeFromArray($item);
-        }, $response['Response']['results']);
-    }
-
-    /**
      * @return GeneralUser
      * @throws ApiKeyException
      * @throws ClientException
@@ -306,7 +249,6 @@ class Client
 
         return GeneralUser::makeFromArray($response['Response']);
     }
-
 
     /**
      * Shim for testing the API
