@@ -17,7 +17,7 @@ namespace Destiny\Enums;
  * Class RuntimeGroupMemberType
  * @package Destiny\Enums
  */
-class RuntimeGroupMemberType
+class RuntimeGroupMemberType implements Enum
 {
 
     const NONE = 0;
@@ -50,6 +50,9 @@ class RuntimeGroupMemberType
                 break;
             case self::FOUNDER:
                 return "Founder";
+                break;
+            default:
+                return '';
                 break;
         }
     }

@@ -17,14 +17,14 @@ namespace Destiny\Enums;
  * Class GroupType
  * @package Destiny\Enums
  */
-class GroupType
+class GroupType implements Enum
 {
 
     const GENERAL = 0;
     const CLAN = 1;
 
     /**
-     * @param $type
+     * @param int $type
      * @return string
      */
     public static function getLabel($type) {

@@ -1,0 +1,133 @@
+<html>
+    <head>
+        <script
+            type="text/javascript"
+            src="../../js/jquery-1.4.2.min.js">
+        </script>
+        <script
+            type="text/javascript"
+            src="../../syntax_highlighter/scripts/shCore.js">
+        </script>
+        <script
+            type="text/javascript"
+            src="../../syntax_highlighter/scripts/shBrushJScript.js">
+        </script>
+        <script
+            type="text/javascript"
+            src="../../syntax_highlighter/scripts/shBrushPhp.js">
+        </script>
+        <script
+            type="text/javascript"
+            src="../../syntax_highlighter/scripts/shBrushXml.js">
+        </script>
+        <link
+            href="../../syntax_highlighter/styles/shCore.css" rel="stylesheet"
+            type="text/css"
+        />
+        <link
+            href="../../syntax_highlighter/styles/shCoreEclipse.css"
+            rel="stylesheet" type="text/css"
+        />
+        <link
+            href="../../syntax_highlighter/styles/shThemeWordpress.css"
+            rel="stylesheet" type="text/css"
+        />
+    </head>
+    <body>
+        <pre class="brush: php">&lt;?php
+/**
+ * destiny2-php
+ * @author Richard Lynskey &lt;richard@mozor.net&gt;
+ * @copyright Copyright (c) 2017, Richard Lynskey
+ * @license https://opensource.org/licenses/MIT MIT
+ * @version 0.1
+ *
+ * Built 2017-09-30 13:22 CDT by richard
+ *
+ */
+
+namespace Destiny\Enums;
+
+/**
+ * Class BungieMembershipType
+ * @package Destiny\Enums
+ */
+class BungieMembershipType implements Enum
+{
+    /**
+     *
+     */
+    const ALL = -1;
+
+    /**
+     *
+     */
+    const NONE = 0;
+
+    /**
+     *
+     */
+    const TIGERXBOX = 1;
+
+    /**
+     *
+     */
+    const TIGERPSN = 2;
+
+    /**
+     *
+     */
+    const TIGERBLIZZARD = 4;
+
+    /**
+     *
+     */
+    const TIGERDEMON = 10;
+
+    /**
+     * Actual Bungie account
+     */
+    const BUNGIENEXT = 254;
+
+    /**
+     * @param int $type
+     * @return string
+     */
+    public static function getLabel($type) {
+        switch ($type) {
+            case self::ALL:
+                return &quot;All&quot;;
+                break;
+            case self::NONE:
+                return &quot;None&quot;;
+                break;
+            case self::TIGERXBOX:
+                return &quot;XBox&quot;;
+                break;
+            case self::TIGERPSN:
+                return &quot;PSN&quot;;
+                break;
+            case self::TIGERBLIZZARD:
+                return &quot;Blizzard&quot;;
+                break;
+            case self::TIGERDEMON:
+                return &quot;Demon&quot;;
+                break;
+            case self::BUNGIENEXT:
+                return &quot;BungieNext&quot;;
+                break;
+            default:
+                return &quot;&quot;;
+                break;
+        }
+    }
+
+}</pre>
+        <script type="text/javascript">
+             SyntaxHighlighter.all();
+             jQuery('.gutter div').each(function(key, data){
+                jQuery(data).prepend('<a name="L'+jQuery(data).text()+'"/>');
+             });
+        </script>
+    </body>
+</html>

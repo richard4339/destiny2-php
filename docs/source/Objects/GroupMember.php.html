@@ -1,0 +1,107 @@
+<html>
+    <head>
+        <script
+            type="text/javascript"
+            src="../../js/jquery-1.4.2.min.js">
+        </script>
+        <script
+            type="text/javascript"
+            src="../../syntax_highlighter/scripts/shCore.js">
+        </script>
+        <script
+            type="text/javascript"
+            src="../../syntax_highlighter/scripts/shBrushJScript.js">
+        </script>
+        <script
+            type="text/javascript"
+            src="../../syntax_highlighter/scripts/shBrushPhp.js">
+        </script>
+        <script
+            type="text/javascript"
+            src="../../syntax_highlighter/scripts/shBrushXml.js">
+        </script>
+        <link
+            href="../../syntax_highlighter/styles/shCore.css" rel="stylesheet"
+            type="text/css"
+        />
+        <link
+            href="../../syntax_highlighter/styles/shCoreEclipse.css"
+            rel="stylesheet" type="text/css"
+        />
+        <link
+            href="../../syntax_highlighter/styles/shThemeWordpress.css"
+            rel="stylesheet" type="text/css"
+        />
+    </head>
+    <body>
+        <pre class="brush: php">&lt;?php
+/**
+ * destiny2-php
+ * @author Richard Lynskey &lt;richard@mozor.net&gt;
+ * @copyright Copyright (c) 2017, Richard Lynskey
+ * @license https://opensource.org/licenses/MIT MIT
+ * @version 0.1
+ *
+ * Built 2017-09-23 10:25 CDT by richard
+ *
+ */
+
+namespace Destiny\Objects;
+
+use Destiny\AbstractResource;
+use Destiny\Enums\RuntimeGroupMemberType;
+use JsonSerializable;
+
+/**
+ * Class GroupMember
+ * @package Destiny\Objects
+ *
+ * @link https://bungie-net.github.io/multi/schema_GroupsV2-GroupMember.html#schema_GroupsV2-GroupMember
+ *
+ * @method int memberType() RuntimeGroupMemberType enum
+ * @method bool isOnline()
+ * @method string groupId()
+ * @method \DateTime joinDate($tz = null)
+ * @method UserInfoCard destinyUserInfo()
+ * @method UserInfoCard bungieNetUserInfo()
+ *
+ * @todo According to the API, both destinyUserInfo() and bungieNetUserInfo() return a UserInfoCard,
+ * however, they actually return slightly different data. The bungieNetUserInfo() returns a membershipType that isn't
+ * defined for example
+ */
+class GroupMember extends AbstractResource
+{
+
+    /**
+     * @var array Array of columns that will need to be casted to their own class
+     */
+    protected $casts = [
+        'destinyUserInfo' =&gt; UserInfoCard::class,
+        'bungieNetUserInfo' =&gt; UserInfoCard::class
+    ];
+
+    /**
+     * @var string[] Array of string columns that will need to be converted to dates using getDateTime() in lieu of get()
+     */
+    protected $dates = [
+        'joinDate'
+    ];
+
+    /**
+     * Gets the member type label
+     *
+     * @return string
+     */
+    public function memberTypeLabel() {
+        return RuntimeGroupMemberType::getLabel($this-&gt;memberType());
+    }
+
+}</pre>
+        <script type="text/javascript">
+             SyntaxHighlighter.all();
+             jQuery('.gutter div').each(function(key, data){
+                jQuery(data).prepend('<a name="L'+jQuery(data).text()+'"/>');
+             });
+        </script>
+    </body>
+</html>

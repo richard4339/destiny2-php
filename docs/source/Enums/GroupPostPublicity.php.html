@@ -1,0 +1,106 @@
+<html>
+    <head>
+        <script
+            type="text/javascript"
+            src="../../js/jquery-1.4.2.min.js">
+        </script>
+        <script
+            type="text/javascript"
+            src="../../syntax_highlighter/scripts/shCore.js">
+        </script>
+        <script
+            type="text/javascript"
+            src="../../syntax_highlighter/scripts/shBrushJScript.js">
+        </script>
+        <script
+            type="text/javascript"
+            src="../../syntax_highlighter/scripts/shBrushPhp.js">
+        </script>
+        <script
+            type="text/javascript"
+            src="../../syntax_highlighter/scripts/shBrushXml.js">
+        </script>
+        <link
+            href="../../syntax_highlighter/styles/shCore.css" rel="stylesheet"
+            type="text/css"
+        />
+        <link
+            href="../../syntax_highlighter/styles/shCoreEclipse.css"
+            rel="stylesheet" type="text/css"
+        />
+        <link
+            href="../../syntax_highlighter/styles/shThemeWordpress.css"
+            rel="stylesheet" type="text/css"
+        />
+    </head>
+    <body>
+        <pre class="brush: php">&lt;?php
+/**
+ * destiny2-php
+ * @author Richard Lynskey &lt;richard@mozor.net&gt;
+ * @copyright Copyright (c) 2017, Richard Lynskey
+ * @license https://opensource.org/licenses/MIT MIT
+ * @version 0.1
+ *
+ * Built 2017-10-01 12:32 CDT by richard
+ *
+ */
+
+namespace Destiny\Enums;
+
+/**
+ * Class GroupPostPublicity
+ * @package Destiny\Enums
+ *
+ * @link https://bungie-net.github.io/multi/schema_GroupsV2-GroupPostPublicity.html#schema_GroupsV2-GroupPostPublicity
+ */
+class GroupPostPublicity implements Enum
+{
+    /**
+     *
+     */
+    const PUBLICITY_PUBLIC = 0;
+
+    /**
+     *
+     */
+    const PUBLICITY_ALLIANCE = 1;
+
+    /**
+     *
+     */
+    const PUBLICITY_PRIVATE = 2;
+
+    /**
+     * Get the label for the provided enum value
+     *
+     * @param int $type
+     * @return string
+     */
+    public static function getLabel($type)
+    {
+        switch ($type) {
+            case self::PUBLICITY_PUBLIC:
+                return &quot;Public&quot;;
+                break;
+            case self::PUBLICITY_ALLIANCE:
+                return &quot;Alliance&quot;;
+                break;
+            case self::PUBLICITY_PRIVATE:
+                return &quot;Private&quot;;
+                break;
+            default:
+                return '';
+                break;
+        }
+    }
+
+}</pre>
+        <script type="text/javascript">
+             SyntaxHighlighter.all();
+             jQuery('.gutter div').each(function(key, data){
+                jQuery(data).prepend('<a name="L'+jQuery(data).text()+'"/>');
+             });
+        </script>
+    </body>
+</html>

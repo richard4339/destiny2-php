@@ -1,0 +1,48 @@
+<?php
+/**
+ * destiny2-php
+ * @author Richard Lynskey <richard@mozor.net>
+ * @copyright Copyright (c) 2017, Richard Lynskey
+ * @license https://opensource.org/licenses/MIT MIT
+ * @version 0.1
+ *
+ * Built 2017-09-28 12:18 CDT by richard
+ *
+ */
+
+namespace Destiny\Objects;
+
+
+use Destiny\AbstractResource;
+
+/**
+ * Class GroupResponse
+ * @package Destiny\Objects
+ *
+ * @link https://bungie-net.github.io/multi/schema_GroupsV2-GroupResponse.html#schema_GroupsV2-GroupResponse
+ *
+ * @method Group detail()
+ * @method GroupMember founder()
+ * @method int[] alliedIds()
+ * @method Group parentGroup()
+ * @method int allianceStatus() GroupAllianceStatus enum https://bungie-net.github.io/multi/schema_GroupsV2-GroupAllianceStatus.html#schema_GroupsV2-GroupAllianceStatus
+ * @method int groupJoinInviteCount()
+ * @method mixed currentUserMemberMap() Requires OAuth
+ * @method mixed currentUserPotentialMemberMap() Requires OAuth
+ *
+ */
+class GroupResponse extends AbstractResource
+{
+
+    /**
+     * @var array Array of columns that will need to be casted to their own class
+     */
+    protected $casts = [
+        'detail' => Group::class,
+        'founder' => GroupMember::class,
+        'parentGroup' => Group::class,
+//        'currentUserMemberMap' => GroupMember::class,
+//        'currentUserPotentialMemberMap' => GroupMember::class
+    ];
+
+}

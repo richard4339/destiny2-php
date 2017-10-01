@@ -74,4 +74,18 @@ class GroupTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('richard4339', $user->founder()->destinyUserInfo()->displayName());
     }
 
+    /**
+     *
+     */
+    public function testGetGroupFeatureUpdateBannerPermissionOverride()
+    {
+        $client = new Client(self::TEST_API_KEY, self::TEST_OAUTH_TOKEN);
+        $client->setMock(__DIR__ . '/static/getClan.json');
+
+        $permission = $client->getGroup(self::TEST_CLANID);
+
+        $this->assertEquals(true, $permission->detail()->features()->updateBannerPermissionOverride());
+
+    }
+
 }

@@ -8,7 +8,6 @@
  *
  * Built 2017-09-30 13:22 CDT by richard
  *
- *
  */
 
 namespace Destiny\Enums;
@@ -17,15 +16,41 @@ namespace Destiny\Enums;
  * Class BungieMembershipType
  * @package Destiny\Enums
  */
-class BungieMembershipType
+class BungieMembershipType implements Enum
 {
-
+    /**
+     *
+     */
     const ALL = -1;
+
+    /**
+     *
+     */
     const NONE = 0;
+
+    /**
+     *
+     */
     const TIGERXBOX = 1;
+
+    /**
+     *
+     */
     const TIGERPSN = 2;
+
+    /**
+     *
+     */
     const TIGERBLIZZARD = 4;
+
+    /**
+     *
+     */
     const TIGERDEMON = 10;
+
+    /**
+     * Actual Bungie account
+     */
     const BUNGIENEXT = 254;
 
     /**

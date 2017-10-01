@@ -49,9 +49,27 @@ use DateTimeZone;
 abstract class AbstractResource
 {
     protected $data = [];
+
+    /**
+     * @var array Array of columns that will need to be casted to their own class
+     * Example: ['property' => SomeClass::class]
+     */
     protected $casts = [];
+
+    /**
+     * @var string[] Array of string columns that will need to be converted to dates using getDateTime() in lieu of get()
+     */
     protected $dates = [];
 
+    /**
+     * @var array Array of columns that can be cast to an enum type
+     * Example: ['property' => SomeEnum::class]
+     */
+    protected $enums = [];
+
+    /**
+     *
+     */
     const TIMEZONE = 'UTC';
 
     /**
@@ -63,6 +81,7 @@ abstract class AbstractResource
     }
 
     /**
+     * Converts the response into an array
      * @param array $properties
      * @return static
      */
@@ -79,6 +98,7 @@ abstract class AbstractResource
     }
 
     /**
+     * Parses the properties
      * @param array $properties
      */
     protected function parseProperties(array $properties)
@@ -89,6 +109,8 @@ abstract class AbstractResource
     }
 
     /**
+     * Parse out castable keys
+     *
      * @param mixed $key
      * @param mixed $value
      * @return mixed
@@ -103,6 +125,8 @@ abstract class AbstractResource
     }
 
     /**
+     * Is the key castable?
+     *
      * @param $key
      * @return bool
      */
@@ -112,6 +136,8 @@ abstract class AbstractResource
     }
 
     /**
+     * Cast the key
+     *
      * @param $key
      * @param $value
      * @return mixed
@@ -124,6 +150,8 @@ abstract class AbstractResource
     }
 
     /**
+     * Set the raw property of a key
+     *
      * @param $key
      * @param $value
      * @return mixed
@@ -141,6 +169,8 @@ abstract class AbstractResource
     }
 
     /**
+     * Actually get the value for the key
+     *
      * @param mixed|null $key
      * @param mixed|null $default
      * @return array|mixed|null
@@ -155,6 +185,8 @@ abstract class AbstractResource
     }
 
     /**
+     * Magic method for calling get()
+     *
      * @param string $name
      * @param array $arguments
      * @return array|mixed|null

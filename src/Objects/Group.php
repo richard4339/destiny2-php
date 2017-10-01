@@ -23,10 +23,53 @@ use Destiny\AbstractResource;
  *
  * @method integer groupId()
  * @method string name()
- *
- * @todo Need to add the additional methods
+ * @method int groupType() GroupType enum
+ * @method int membershipIdCreated()
+ * @method \DateTime creationDate($tz = null)
+ * @method \DateTime modificationDate($tz = null)
+ * @method string about()
+ * @method string[] tags()
+ * @method int memberCount()
+ * @method boolean isPublic()
+ * @method boolean isPublicTopicAdminOnly()
+ * @method int primaryAlliedGroupId()
+ * @method string motto()
+ * @method boolean allowChat()
+ * @method boolean isDefaultPostPublic()
+ * @method int chatSecurity() ChatSecuritySetting enum
+ * @method string locale()
+ * @method int avatarImageIndex()
+ * @method int homepage() GroupHomepage enum
+ * @method int membershipOption() MembershipOption enum
+ * @method int defaultPublicity() GroupPostPublicity enum
+ * @method string theme()
+ * @method string bannerPath()
+ * @method string avatarPath()
+ * @method boolean isAllianceOwner()
+ * @method int conversationId()
+ * @method boolean enableInvitationMessagingForAdmins()
+ * @method \DateTime banExpireDate($tz = null)
+ * @method GroupFeatures features()
+ * @method ClanInfoAndInvestment clanInfo()
  */
 class Group extends AbstractResource
 {
+
+    /**
+     * @var string[] Array of string columns that will need to be converted to dates using getDateTime() in lieu of get()
+     */
+    protected $dates = [
+        'creationDate',
+        'modificationDate',
+        'banExpireDate'
+    ];
+
+    /**
+     * @var array Array of columns that will need to be casted to their own class
+     */
+    protected $casts = [
+        'features' => GroupFeatures::class,
+        'clanInfo' => ClanInfoAndInvestment::class
+    ];
 
 }

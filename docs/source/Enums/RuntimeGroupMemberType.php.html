@@ -1,0 +1,104 @@
+<html>
+    <head>
+        <script
+            type="text/javascript"
+            src="../../js/jquery-1.4.2.min.js">
+        </script>
+        <script
+            type="text/javascript"
+            src="../../syntax_highlighter/scripts/shCore.js">
+        </script>
+        <script
+            type="text/javascript"
+            src="../../syntax_highlighter/scripts/shBrushJScript.js">
+        </script>
+        <script
+            type="text/javascript"
+            src="../../syntax_highlighter/scripts/shBrushPhp.js">
+        </script>
+        <script
+            type="text/javascript"
+            src="../../syntax_highlighter/scripts/shBrushXml.js">
+        </script>
+        <link
+            href="../../syntax_highlighter/styles/shCore.css" rel="stylesheet"
+            type="text/css"
+        />
+        <link
+            href="../../syntax_highlighter/styles/shCoreEclipse.css"
+            rel="stylesheet" type="text/css"
+        />
+        <link
+            href="../../syntax_highlighter/styles/shThemeWordpress.css"
+            rel="stylesheet" type="text/css"
+        />
+    </head>
+    <body>
+        <pre class="brush: php">&lt;?php
+/**
+ * destiny2-php
+ * @author Richard Lynskey &lt;richard@mozor.net&gt;
+ * @copyright Copyright (c) 2017, Richard Lynskey
+ * @license https://opensource.org/licenses/MIT MIT
+ * @version 0.1
+ *
+ * Built 2017-09-24 13:41 CDT by richard
+ *
+ *
+ */
+
+namespace Destiny\Enums;
+
+/**
+ * Class RuntimeGroupMemberType
+ * @package Destiny\Enums
+ */
+class RuntimeGroupMemberType implements Enum
+{
+
+    const NONE = 0;
+    const BEGINNER = 1;
+    const MEMBER = 2;
+    const ADMIN = 3;
+    const ACTINGFOUNDER = 4;
+    const FOUNDER = 5;
+
+    /**
+     * @param int $type
+     * @return string
+     */
+    public static function getLabel($type) {
+        switch ($type) {
+            case self::NONE:
+                return &quot;None&quot;;
+                break;
+            case self::BEGINNER:
+                return &quot;Beginner&quot;;
+                break;
+            case self::MEMBER:
+                return &quot;Member&quot;;
+                break;
+            case self::ADMIN:
+                return &quot;Admin&quot;;
+                break;
+            case self::ACTINGFOUNDER:
+                return &quot;ActingFounder&quot;;
+                break;
+            case self::FOUNDER:
+                return &quot;Founder&quot;;
+                break;
+            default:
+                return '';
+                break;
+        }
+    }
+
+}</pre>
+        <script type="text/javascript">
+             SyntaxHighlighter.all();
+             jQuery('.gutter div').each(function(key, data){
+                jQuery(data).prepend('<a name="L'+jQuery(data).text()+'"/>');
+             });
+        </script>
+    </body>
+</html>

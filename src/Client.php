@@ -28,6 +28,10 @@ use GuzzleHttp\HandlerStack;
 /**
  * Class Client
  * @package Destiny
+ *
+ * Some of get functions do require an OAuth token for access. If you do not pass an OAuth token for functions that do
+ * not require it, that is fine. However, if you pass an invalid OAuth token to ANY function regardless of its
+ * requirements you will get an OAuthException
  */
 class Client
 {
@@ -174,11 +178,21 @@ class Client
     }
 
     /**
+     * Get a Bungie group either by name with grouptype or by groupID (grouptype is ignored with a groupID).
+     * Note that a group with a numeric only name will not work here as this function will see it as a groupID
+     *
+     * There is a bug currently in the Bungie API that is causing lookup by name to not always function when names have
+     * a space in them. See https://github.com/Bungie-net/api/issues/162
+     *
      * @param string|int $group
-     * @param int $groupType
+     * @param string|int $groupType
      * @return GroupResponse
+     *
      * @throws ApiKeyException
      * @throws ClientException
+     * @throws OAuthException
+     *
+     * OAuth token optional. Passing an OAuth token for a user in the requested group will cause it to return more info.
      *
      * @link https://bungie-net.github.io/multi/operation_get_GroupV2-GetGroupByName.html#operation_get_GroupV2-GetGroupByName
      * @link https://bungie-net.github.io/multi/operation_get_GroupV2-GetGroup.html#operation_get_GroupV2-GetGroup
@@ -198,6 +212,10 @@ class Client
      * @param int $currentPage
      * @return GroupMember[]
      *
+     * @throws ApiKeyException
+     * @throws ClientException
+     * @throws OAuthException
+     *
      * @link https://bungie-net.github.io/multi/operation_get_GroupV2-GetMembersOfGroup.html#operation_get_GroupV2-GetMembersOfGroup
      */
     public function getClanMembers($clanID, $currentPage = 1)
@@ -215,6 +233,10 @@ class Client
      * @param int $currentPage
      * @return GroupMember[]
      *
+     * @throws ApiKeyException
+     * @throws ClientException
+     * @throws OAuthException
+     *
      * @link https://bungie-net.github.io/multi/operation_get_GroupV2-GetAdminsAndFounderOfGroup.html#operation_get_GroupV2-GetAdminsAndFounderOfGroup
      */
     public function getClanAdminsAndFounder($clanID, $currentPage = 1)
@@ -229,9 +251,12 @@ class Client
 
     /**
      * @return GeneralUser
+     *
      * @throws ApiKeyException
      * @throws ClientException
      * @throws OAuthException
+     *
+     * Requires an OAuth token
      */
     public function getCurrentBungieUser()
     {
@@ -246,8 +271,10 @@ class Client
     /**
      * @param int $userID
      * @return GeneralUser
+     *
      * @throws ApiKeyException
      * @throws ClientException
+     * @throws OAuthException
      *
      * @link https://bungie-net.github.io/multi/operation_get_User-GetBungieNetUserById.html#operation_get_User-GetBungieNetUserById
      */
