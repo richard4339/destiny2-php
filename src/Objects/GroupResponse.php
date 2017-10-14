@@ -14,6 +14,7 @@ namespace Destiny\Objects;
 
 
 use Destiny\AbstractResource;
+use JsonSerializable;
 
 /**
  * Class GroupResponse
@@ -31,7 +32,7 @@ use Destiny\AbstractResource;
  * @method mixed currentUserPotentialMemberMap() Requires OAuth
  *
  */
-class GroupResponse extends AbstractResource
+class GroupResponse extends AbstractResource implements JsonSerializable
 {
 
     /**
@@ -44,5 +45,21 @@ class GroupResponse extends AbstractResource
 //        'currentUserMemberMap' => GroupMember::class,
 //        'currentUserPotentialMemberMap' => GroupMember::class
     ];
+
+    /**
+     * Make JSON ready
+     *
+     * @return array
+     */
+    public function jsonSerialize()
+    {
+        return [
+            'detail' => $this->detail(),
+            'founder' => $this->founder(),
+            'alliedIds' => $this->alliedIds(),
+            'allianceStatus' => $this->allianceStatus(),
+            'groupJoinInviteCount' => $this->groupJoinInviteCount()
+        ];
+    }
 
 }

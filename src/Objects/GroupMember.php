@@ -33,7 +33,7 @@ use JsonSerializable;
  * however, they actually return slightly different data. The bungieNetUserInfo() returns a membershipType that isn't
  * defined for example
  */
-class GroupMember extends AbstractResource
+class GroupMember extends AbstractResource implements JsonSerializable
 {
 
     /**
@@ -58,6 +58,24 @@ class GroupMember extends AbstractResource
      */
     public function memberTypeLabel() {
         return RuntimeGroupMemberType::getLabel($this->memberType());
+    }
+
+    /**
+     * Make JSON ready
+     *
+     * @return array
+     */
+    public function jsonSerialize()
+    {
+        return [
+            'bungieDisplayName' => $this->bungieNetUserInfo()->displayName(),
+            'memberType' => $this->memberType(),
+            'isOnline' => $this->isOnline(),
+            'groupId' => $this->groupId(),
+            'joinDate' => $this->joinDate(),
+            'destinyUserInfo' => $this->destinyUserInfo(),
+            'bungieNetUserInfo' => $this->bungieNetUserInfo()
+        ];
     }
 
 }

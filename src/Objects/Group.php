@@ -14,6 +14,7 @@ namespace Destiny\Objects;
 
 
 use Destiny\AbstractResource;
+use JsonSerializable;
 
 /**
  * Class Group
@@ -52,7 +53,7 @@ use Destiny\AbstractResource;
  * @method GroupFeatures features()
  * @method ClanInfoAndInvestment clanInfo()
  */
-class Group extends AbstractResource
+class Group extends AbstractResource implements JsonSerializable
 {
 
     /**
@@ -71,5 +72,41 @@ class Group extends AbstractResource
         'features' => GroupFeatures::class,
         'clanInfo' => ClanInfoAndInvestment::class
     ];
+
+    /**
+     * Make JSON ready
+     *
+     * @return array
+     */
+    public function jsonSerialize()
+    {
+        return [
+            'groupId' => $this->groupId(),
+            'name' => $this->name(),
+            'groupType' => $this->groupType(),
+            'membershipIdCreated' => $this->membershipIdCreated(),
+            'creationDate' => $this->creationDate(),
+            'modificationDate' => $this->modificationDate(),
+            'about' => $this->about(),
+            'tags' => $this->tags(),
+            'memberCount' => $this->memberCount(),
+            'isPublic' => $this->isPublic(),
+            'isPublicTopicAdminOnly' => $this->isPublicTopicAdminOnly(),
+            'primaryAlliedGroupId' => $this->primaryAlliedGroupId(),
+            'motto' => $this->motto(),
+            'allowChat' => $this->allowChat(),
+            'isDefaultPostPublic' => $this->isDefaultPostPublic(),
+            'locale' => $this->locale(),
+            'avatarImageIndex' => $this->avatarImageIndex(),
+            'homepage' => $this->homepage(),
+            'theme' => $this->theme(),
+            'bannerPath' => $this->bannerPath(),
+            'avatarPath' => $this->avatarPath(),
+            'isAllianceOwner' => $this->isAllianceOwner(),
+            'conversationId' => $this->conversationId(),
+            'enableInvitationMessagingForAdmins' => $this->enableInvitationMessagingForAdmins(),
+            'banExpireDate' => $this->banExpireDate(),
+        ];
+    }
 
 }
