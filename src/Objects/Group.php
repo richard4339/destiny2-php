@@ -106,6 +106,7 @@ class Group extends AbstractResource implements JsonSerializable
             'conversationId' => $this->conversationId(),
             'enableInvitationMessagingForAdmins' => $this->enableInvitationMessagingForAdmins(),
             'banExpireDate' => $this->banExpireDate(),
+            'features' => $this->features()
         ];
     }
 

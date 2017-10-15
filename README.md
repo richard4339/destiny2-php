@@ -11,6 +11,8 @@ A PHP wrapper for the [Destiny 2 API](https://github.com/Bungie-net/api)
 ## About
 Currently includes (mostly) just the clan endpoints, with user endpoints coming soon.
 
+My intention is to make all object calls be JSON Serializable by implementing JsonSerializable()
+
 ## Installation
 ### Using Composer
 ```
