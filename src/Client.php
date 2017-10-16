@@ -12,10 +12,15 @@
 
 namespace Destiny;
 
+use Destiny\Enums\BungieMembershipType;
+use Destiny\Enums\DestinyComponentType;
 use Destiny\Enums\GroupType;
 use Destiny\Exceptions\ClientException;
 use Destiny\Exceptions\ApiKeyException;
 use Destiny\Exceptions\OAuthException;
+use Destiny\Objects\DestinyCharacterComponent;
+use Destiny\Objects\DestinyProfileComponent;
+use Destiny\Objects\DestinyProfileResponse;
 use Destiny\Objects\GeneralUser;
 use Destiny\Objects\GroupMember;
 use Destiny\Objects\GroupResponse;
@@ -174,7 +179,8 @@ class Client
         if (!empty($queryParams)) {
             $query = http_build_query($queryParams);
         }
-        return sprintf("%s/%s/%s/?%s", self::URI, $endpoint, implode("/", $uriParams), $query);
+        $url = sprintf("%s/%s/%s/?%s", self::URI, $endpoint, implode("/", $uriParams), $query);
+        return $url;
     }
 
     /**
@@ -199,7 +205,7 @@ class Client
      */
     public function getGroup($group, $groupType = GroupType::CLAN)
     {
-        if(is_integer($group)) {
+        if (is_integer($group)) {
             $response = $this->request($this->_buildRequestString('GroupV2', [$group]));
         } else {
             $response = $this->request($this->_buildRequestString('GroupV2', ['Name', $group, $groupType]));
@@ -266,6 +272,61 @@ class Client
         $response = $this->request($this->_buildRequestString('User', ['GetCurrentBungieNetUser']));
 
         return GeneralUser::makeFromArray($response['Response']);
+    }
+
+    /**
+     * @param int|string $membershipType
+     * @param int $membershipID
+     * @param string[]|int[] $components
+     *
+     * @return mixed
+     *
+     * @throws ApiKeyException
+     * @throws ClientException
+     * @throws OAuthException
+     */
+    public function getProfile($membershipType, $membershipID, ...$components)
+    {
+        // Check to see if the supplied membershipType is a number. If not, convert it to the label
+        if (is_int($membershipType)) {
+            $membershipType = BungieMembershipType::getLabel($membershipType);
+        }
+        if($membershipType == "None" || $membershipType == "") {
+            throw new ClientException('An invalid MembershipType was supplied.');
+        }
+
+        $params = [];
+        foreach($components as $i) {
+            if(is_int($i)) {
+                $params[] = DestinyComponentType::getLabel($i);
+            } else {
+                $params[] = $i;
+            }
+        }
+
+        $response = $this->request($this->_buildRequestString('Destiny2', [$membershipType, 'Profile', $membershipID], ['components' => implode(',', $params)]));
+
+        $profileResponse = new DestinyProfileResponse();
+        $profileResponse->profile = DestinyProfileComponent::makeFromArray($response['Response']['profile']);
+
+        $profileResponse->characters = array_map(function ($item) {
+            return DestinyCharacterComponent::makeFromArray($item);
+        }, $response['Response']['characters']['data']);
+
+        return $profileResponse;
+
+    }
+
+    /**
+     * Gets the absolute path on https://www.bungie.net to the mobileWorldContentPath for the given locale (defaults to en)
+     * @param string $locale Defaults to en.
+     * @return string
+     */
+    public function getMobileWorldContentsPath($locale = "en")
+    {
+        $response = $this->request($this->_buildRequestString('Destiny2', ['Manifest']));
+
+        return $response['Response']['mobileWorldContentPaths'][$locale];
     }
 
     /**

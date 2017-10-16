@@ -13,7 +13,9 @@
 namespace Destiny\Objects;
 
 use Destiny\AbstractResource;
+use Destiny\Enums\BungieMembershipType;
 use Destiny\Enums\Capabilities;
+use Destiny\Enums\HostGuidedGamesPermissionLevel;
 use Destiny\Enums\RuntimeGroupMemberType;
 use JsonSerializable;
 
@@ -44,21 +46,26 @@ class GroupFeatures extends AbstractResource implements JsonSerializable
      */
     public function jsonSerialize()
     {
-        return [
+        $membershipTypes = [];
+        foreach($this->membershipTypes() as $i) {
+            $membershipTypes[] = BungieMembershipType::getLabel($i);
+        }
+        $features = [
             'maximumMembers' => $this->maximumMembers(),
             'maximumMembershipsOfGroupType' => $this->maximumMembershipsOfGroupType(),
             'capabilities' => $this->capabilities(),
-            'capabilitiesLabel' => Capabilities::getLabel($this->capabilities()),
             'membershipTypes' => $this->membershipTypes(),
-            'membershipTypesLabels' => $this->membershipTypes(),
+            'membershipTypesLabels' => $membershipTypes,
             'invitePermissionOverride' => $this->invitePermissionOverride(),
             'updateCulturePermissionOverride' => $this->updateCulturePermissionOverride(),
             'hostGuidedGamePermissionOverride' => $this->hostGuidedGamePermissionOverride(),
-            'hostGuidedGamePermissionOverrideLabel' => $this->hostGuidedGamePermissionOverride(),
+            'hostGuidedGamePermissionOverrideLabel' => HostGuidedGamesPermissionLevel::getLabel($this->hostGuidedGamePermissionOverride()),
             'updateBannerPermissionOverride' => $this->updateBannerPermissionOverride(),
             'joinLevel' => $this->joinLevel(),
             'joinLevelLabel' => RuntimeGroupMemberType::getLabel($this->joinLevel())
         ];
+
+        return $features;
     }
 
 }

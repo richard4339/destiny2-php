@@ -66,16 +66,16 @@ class BungieMembershipType implements Enum
                 return "None";
                 break;
             case self::TIGERXBOX:
-                return "XBox";
+                return "TigerXBox";
                 break;
             case self::TIGERPSN:
-                return "PSN";
+                return "TigerPSN";
                 break;
             case self::TIGERBLIZZARD:
-                return "Blizzard";
+                return "TigerBlizzard";
                 break;
             case self::TIGERDEMON:
-                return "Demon";
+                return "TigerDemon";
                 break;
             case self::BUNGIENEXT:
                 return "BungieNext";

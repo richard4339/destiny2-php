@@ -47,7 +47,9 @@ class UserInfoCard extends AbstractResource implements JsonSerializable
         return [
             'supplementalDisplayName' => $this->supplementalDisplayName(),
             'iconPath' => $this->iconPath(),
+            'iconURL' => 'https://www.bungie.net' . $this->iconPath(),
             'membershipType' => $this->membershipType(),
+            'membershipTypeLabel' => $this->membershipTypeLabel(),
             'membershipId' => $this->membershipId(),
             'displayName' => $this->displayName()
         ];
