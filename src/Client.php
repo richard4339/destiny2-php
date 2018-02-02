@@ -2,9 +2,9 @@
 /**
  * destiny2-php
  * @author Richard Lynskey <richard@mozor.net>
- * @copyright Copyright (c) 2017, Richard Lynskey
+ * @copyright Copyright (c) 2017-2018, Richard Lynskey
  * @license https://opensource.org/licenses/MIT MIT
- * @version 0.1
+ * @version 0.2
  *
  * Built 2017-09-23 09:51 CDT by richard
  *
@@ -21,9 +21,11 @@ use Destiny\Exceptions\OAuthException;
 use Destiny\Objects\DestinyCharacterComponent;
 use Destiny\Objects\DestinyProfileComponent;
 use Destiny\Objects\DestinyProfileResponse;
+use Destiny\Objects\DestinyVendorResponse;
 use Destiny\Objects\GeneralUser;
 use Destiny\Objects\GroupMember;
 use Destiny\Objects\GroupResponse;
+use Destiny\Objects\Vendor;
 use GuzzleHttp\Exception\ClientException as GuzzleClientException;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Psr7\Response;
@@ -37,6 +39,7 @@ use GuzzleHttp\HandlerStack;
  * Some of get functions do require an OAuth token for access. If you do not pass an OAuth token for functions that do
  * not require it, that is fine. However, if you pass an invalid OAuth token to ANY function regardless of its
  * requirements you will get an OAuthException
+ *
  */
 class Client
 {
@@ -51,6 +54,18 @@ class Client
     protected $_apiKey;
 
     /**
+     * @var string Destiny Application Client ID
+     * @link https://www.bungie.net/en/Application/
+     */
+    protected $_clientID;
+
+    /**
+     * @var string Destiny Application Client Secret (for confidential only)
+     * @link https://www.bungie.net/en/Application/
+     */
+    protected $_clientSecret;
+
+    /**
      * @var string Destiny OAuth Token
      */
     protected $_oauthToken;
@@ -63,10 +78,12 @@ class Client
     /**
      * Client constructor.
      * @param string $apiKey
-     * @param null $token
+     * @param null|string $token
+     * @param null|string $clientID
+     * @param null|string $clientSecret
      * @throws ApiKeyException
      */
-    function __construct($apiKey = '', $token = null)
+    function __construct(string $apiKey = '', ?string $token = null, ?string $clientID = null, ?string $clientSecret = null)
     {
         if (empty($apiKey)) {
             $apiKey = $_ENV["APIKEY"];
@@ -81,20 +98,29 @@ class Client
         if (!empty($token)) {
             $this->_oauthToken = $token;
         }
+
+        if (!empty($clientID)) {
+            $this->_clientID = $clientID;
+        }
+
+        if (!empty($clientSecret)) {
+            $this->_clientSecret = $clientSecret;
+        }
     }
 
     /**
      * @param string $name
      * @return mixed|null
+     *
+     * @deprecated 0.2.0 Since these are simply placeholder/helper wrappers and we want to keep things consistent, use
+     * the new get/set functions instead
      */
     public function __get($name)
     {
 
         switch (strtoupper($name)) {
             case 'CLIENTID':
-            case '_CLIENTID':
             case 'APIKEY':
-            case '_APIKEY':
                 return $this->_apiKey;
                 break;
             default:
@@ -181,6 +207,32 @@ class Client
         }
         $url = sprintf("%s/%s/%s/?%s", self::URI, $endpoint, implode("/", $uriParams), $query);
         return $url;
+    }
+
+    /**
+     * @param string[]|int[] $components
+     * @param string[]|int[] $allowedComponents
+     * @return bool
+     */
+    protected static function _validateComponents(array $components, array $allowedComponents): bool
+    {
+        $allowed = [];
+        foreach ($allowedComponents as $i) {
+            if (is_int($i)) {
+                $allowed[] = DestinyComponentType::getLabel($i);
+            } else {
+                $allowed[] = $i;
+            }
+        }
+        foreach ($components as $i) {
+            if (is_int($i)) {
+                $i = DestinyComponentType::getLabel($i);
+            }
+            if (!in_array($i, $allowed)) {
+                return false;
+            }
+            return true;
+        }
     }
 
     /**
@@ -291,13 +343,13 @@ class Client
         if (is_int($membershipType)) {
             $membershipType = BungieMembershipType::getLabel($membershipType);
         }
-        if($membershipType == "None" || $membershipType == "") {
+        if ($membershipType == "None" || $membershipType == "") {
             throw new ClientException('An invalid MembershipType was supplied.');
         }
 
         $params = [];
-        foreach($components as $i) {
-            if(is_int($i)) {
+        foreach ($components as $i) {
+            if (is_int($i)) {
                 $params[] = DestinyComponentType::getLabel($i);
             } else {
                 $params[] = $i;
@@ -401,6 +453,66 @@ class Client
     }
 
     /**
+     * @param int|string $membershipType A valid non-BungieNet membership type. See: BungieMembershipType
+     * @param string $membershipID Destiny membership ID of another user. You may be denied.
+     * @param string $characterID The Destiny Character ID of the character for whom we're getting vendor info.
+     * @param string|null $vendor [Optional] The Hash identifier of the Vendor to be returned.
+     * @param string[]|int[] $components The components to fetch. At most this can be Vendors, VendorCategories, and VendorSale
+     *
+     * @return DestinyVendorResponse
+     *
+     * @throws ApiKeyException
+     * @throws ClientException
+     * @throws OAuthException
+     *
+     * @todo Support VendorCategories and VendorSales, cannot currently handle multiple vendors being passed by leaving vendor null
+     *
+     * @link https://bungie-net.github.io/multi/operation_get_Destiny2-GetVendor.html#operation_get_Destiny2-GetVendor
+     *
+     * @example To get Xur (this is the actual hash for Xur): $client->getVendor(BungieMembershipType::TIGERPSN, '12345', '67890', '2190858386', DestinyComponentType::VENDORS);
+     */
+    public function getVendor($membershipType, string $membershipID, string $characterID, ?string $vendor = null, ...$components)
+    {
+        // Check to see if the supplied membershipType is a number. If not, convert it to the label
+        if (is_int($membershipType)) {
+            $membershipType = BungieMembershipType::getLabel($membershipType);
+        }
+        if ($membershipType == "None" || $membershipType == "") {
+            throw new ClientException('An invalid MembershipType was supplied.');
+        }
+
+        $params = [];
+        foreach ($components as $i) {
+            if (is_int($i)) {
+                $params[] = DestinyComponentType::getLabel($i);
+            } else {
+                $params[] = $i;
+            }
+        }
+
+        if (!self::_validateComponents($params, [
+            DestinyComponentType::VENDORS,
+            DestinyComponentType::VENDORCATEGORIES,
+            DestinyComponentType::VENDORSALES
+        ])) {
+            throw new ClientException('One or more of the supplied components is not valid for this call.');
+        }
+
+        $uriParams = [$membershipType, 'Profile', $membershipID, 'Character', $characterID, 'Vendors'];
+
+        if (!empty($vendor)) {
+            $uriParams[] = $vendor;
+        }
+        $response = $this->request($this->_buildRequestString('Destiny2', $uriParams, ['components' => implode(',', $params)]));
+
+        $profileResponse = new DestinyVendorResponse();
+        $profileResponse->vendor = Vendor::makeFromArray($response['Response']['vendor']['data']);
+
+        return $profileResponse;
+
+    }
+
+    /**
      * Shim for testing the API
      *
      * @param string $responseFile
@@ -417,5 +529,78 @@ class Client
         $handler = HandlerStack::create($mock);
         $this->_httpClient = new GuzzleClient(['handler' => $handler]);
     }
+
+    /**
+     * @return null|string
+     */
+    public function getApiKey(): ?string
+    {
+        return $this->_apiKey;
+    }
+
+    /**
+     * @param null|string $apiKey
+     * @return Client
+     */
+    public function setApiKey(?string $apiKey): Client
+    {
+        $this->_apiKey = $apiKey;
+        return $this;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getClientID(): ?string
+    {
+        return $this->_clientID;
+    }
+
+    /**
+     * @param null|string $clientID
+     * @return Client
+     */
+    public function setClientID(?string $clientID): Client
+    {
+        $this->_clientID = $clientID;
+        return $this;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getClientSecret(): ?string
+    {
+        return $this->_clientSecret;
+    }
+
+    /**
+     * @param null|string $clientSecret
+     * @return Client
+     */
+    public function setClientSecret(?string $clientSecret): Client
+    {
+        $this->_clientSecret = $clientSecret;
+        return $this;
+    }
+
+    /**
+     * @return null|string
+     */
+    public function getOauthToken(): ?string
+    {
+        return $this->_oauthToken;
+    }
+
+    /**
+     * @param null|string $oauthToken
+     * @return Client
+     */
+    public function setOauthToken(?string $oauthToken): Client
+    {
+        $this->_oauthToken = $oauthToken;
+        return $this;
+    }
+
 
 }

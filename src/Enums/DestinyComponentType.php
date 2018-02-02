@@ -101,15 +101,15 @@ class DestinyComponentType implements Enum
      */
     const ITEMPLUGSTATES = 308;
     /**
-     *
+     * When obtaining vendor information, this will return summary information about the Vendor or Vendors being returned.
      */
     const VENDORS = 400;
     /**
-     *
+     * When obtaining vendor information, this will return information about the categories of items provided by the Vendor.
      */
     const VENDORCATEGORIES = 401;
     /**
-     *
+     * When obtaining vendor information, this will return the information about items being sold by the Vendor.
      */
     const VENDORSALES = 402;
     /**
@@ -191,7 +191,7 @@ class DestinyComponentType implements Enum
                 return "VendorCategories";
                 break;
             case self::VENDORSALES:
-                return "VendorSales";
+                return "VendorSale";
                 break;
             case self::KIOSKS:
                 return "Kiosks";
