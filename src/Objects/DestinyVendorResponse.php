@@ -4,7 +4,7 @@
  * @author Richard Lynskey <richard@mozor.net>
  * @copyright Copyright (c) 2017-2018, Richard Lynskey
  * @license https://opensource.org/licenses/MIT MIT
- * @version 0.2
+ * @version 0.2.1
  *
  * Built 2018-02-02 19:18 CST by richard
  *
@@ -27,6 +27,7 @@ use JsonSerializable;
  * @method VendorSale[]|VendorSale sales() Requires OAuth
  *
  * @property Vendor $vendor
+ * @property VendorSale[] $sales
  *
  */
 class DestinyVendorResponse extends AbstractResource //implements JsonSerializable

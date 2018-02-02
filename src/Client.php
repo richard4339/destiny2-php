@@ -4,7 +4,7 @@
  * @author Richard Lynskey <richard@mozor.net>
  * @copyright Copyright (c) 2017-2018, Richard Lynskey
  * @license https://opensource.org/licenses/MIT MIT
- * @version 0.2
+ * @version 0.2.1
  *
  * Built 2017-09-23 09:51 CDT by richard
  *
@@ -26,6 +26,7 @@ use Destiny\Objects\GeneralUser;
 use Destiny\Objects\GroupMember;
 use Destiny\Objects\GroupResponse;
 use Destiny\Objects\Vendor;
+use Destiny\Objects\VendorSale;
 use GuzzleHttp\Exception\ClientException as GuzzleClientException;
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Psr7\Response;
@@ -465,7 +466,7 @@ class Client
      * @throws ClientException
      * @throws OAuthException
      *
-     * @todo Support VendorCategories and VendorSales, cannot currently handle multiple vendors being passed by leaving vendor null
+     * @todo Support VendorCategories, cannot currently handle multiple vendors being passed by leaving vendor null
      *
      * @link https://bungie-net.github.io/multi/operation_get_Destiny2-GetVendor.html#operation_get_Destiny2-GetVendor
      *
@@ -506,7 +507,15 @@ class Client
         $response = $this->request($this->_buildRequestString('Destiny2', $uriParams, ['components' => implode(',', $params)]));
 
         $profileResponse = new DestinyVendorResponse();
-        $profileResponse->vendor = Vendor::makeFromArray($response['Response']['vendor']['data']);
+        if(isset($response['Response']['vendor']['data'])) {
+            $profileResponse->vendor = Vendor::makeFromArray($response['Response']['vendor']['data']);
+        }
+
+        if(isset($response['Response']['sales']['data'])) {
+            $profileResponse->sales = array_map(function ($item) {
+                return VendorSale::makeFromArray($item);
+            }, $response['Response']['sales']['data']);
+        }
 
         return $profileResponse;
 
