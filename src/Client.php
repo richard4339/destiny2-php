@@ -347,6 +347,60 @@ class Client
     }
 
     /**
+     * @return array
+     *
+     * @throws ApiKeyException
+     * @throws ClientException
+     * @throws OAuthException
+     */
+    public function getMembershipDataForCurrentUser()
+    {
+        if (empty($this->_oauthToken)) {
+            throw new OAuthException('401 Unauthorized');
+        }
+        $response = $this->request($this->_buildRequestString('User', ['GetMembershipsForCurrentUser']));
+
+        return [
+            $response['Response']['destinyMemberships'], //TODO:  make UserInfoCard
+            GeneralUser::makeFromArray($response['Response']['bungieNetUser'])
+        ];
+    }
+
+    /**
+     * @param int|string $membershipType
+     * @param int $membershipID
+     * @return mixed
+     *
+     * @throws ApiKeyException
+     * @throws ClientException
+     * @throws OAuthException
+     */
+    public function getBungieAccount($membershipType, $membershipID)
+    {
+        $response = $this->request($this->_buildRequestString('User', ['GetBungieAccount', $membershipID, $membershipType]));
+
+        return $response;
+
+    }
+
+    /**
+     * @param int|string $membershipType
+     * @param int $membershipID
+     * @return mixed
+     *
+     * @throws ApiKeyException
+     * @throws ClientException
+     * @throws OAuthException
+     */
+    public function getGroupV2User($membershipType, $membershipID)
+    {
+        $response = $this->request($this->_buildRequestString('GroupV2', ['User', $membershipType, $membershipID, 0, 1]));
+
+        return $response['Response']['results'];
+
+    }
+
+    /**
      * Shim for testing the API
      *
      * @param string $responseFile
