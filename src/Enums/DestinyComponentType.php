@@ -191,7 +191,7 @@ class DestinyComponentType implements Enum
                 return "VendorCategories";
                 break;
             case self::VENDORSALES:
-                return "VendorSale";
+                return "VendorSales";
                 break;
             case self::KIOSKS:
                 return "Kiosks";
