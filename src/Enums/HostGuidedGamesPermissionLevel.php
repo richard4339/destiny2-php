@@ -36,6 +36,8 @@ class HostGuidedGamesPermissionLevel implements Enum
     const MEMBER = 2;
 
     /**
+     * Returns the string version of the enum value
+     *
      * @param int $type
      * @return string
      */

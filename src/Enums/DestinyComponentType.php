@@ -115,6 +115,8 @@ class DestinyComponentType implements Enum
     const KIOSKS = 500;
 
     /**
+     * Returns the string version of the enum value
+     *
      * @param int $type
      * @return string
      */

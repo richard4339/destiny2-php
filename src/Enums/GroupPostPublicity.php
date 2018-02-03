@@ -33,7 +33,7 @@ class GroupPostPublicity implements Enum
     const PUBLICITY_PRIVATE = 2;
 
     /**
-     * Get the label for the provided enum value
+     * Returns the string version of the enum value
      *
      * @param int $type
      * @return string

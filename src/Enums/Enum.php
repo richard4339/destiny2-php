@@ -17,6 +17,8 @@ interface Enum
 {
 
     /**
+     * Returns the string version of the enum value
+     *
      * @param int $type
      * @return string
      */

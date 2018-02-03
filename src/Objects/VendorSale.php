@@ -28,6 +28,8 @@ class VendorSale extends AbstractResource //implements JsonSerializable
 {
 
     /**
+     * Gets the cost values
+     *
      * @return VendorSaleCost[]
      */
     public function costs()

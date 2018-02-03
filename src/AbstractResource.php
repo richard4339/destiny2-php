@@ -45,6 +45,10 @@ use DateTimeZone;
  */
 abstract class AbstractResource
 {
+
+    /**
+     * @var array Holds all data
+     */
     protected $data = [];
 
     /**

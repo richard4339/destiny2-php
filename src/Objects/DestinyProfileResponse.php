@@ -26,6 +26,13 @@ use JsonSerializable;
 class DestinyProfileResponse
 {
 
+    /**
+     * Manual call for the various functions by name
+     *
+     * @param $name
+     * @param $arguments
+     * @return mixed
+     */
     public function __call($name, $arguments)
     {
         return $this->$name;

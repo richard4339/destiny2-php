@@ -53,6 +53,8 @@ class UserInfoCard extends AbstractResource implements JsonSerializable
     }
 
     /**
+     * Gets the label from the membershiptype enum
+     *
      * @return string
      */
     public function membershipTypeLabel() {

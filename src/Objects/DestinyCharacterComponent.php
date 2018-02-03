@@ -38,6 +38,11 @@ class DestinyCharacterComponent extends AbstractResource implements JsonSerializ
         'dateLastPlayed'
     ];
 
+    /**
+     * Prints a pretty stats view
+     *
+     * @return mixed
+     */
     public function stats() {
         foreach($this->get('stats') as $index => $key) {
             $hash = sprintf('%u', $index & 0xFFFFFFFF);

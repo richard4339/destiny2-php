@@ -59,6 +59,8 @@ class Capabilities implements Enum
     const ALLIANCES = 64;
 
     /**
+     * Returns the string version of the enum value
+     *
      * @param int $type
      * @return string
      */

@@ -17,10 +17,19 @@ namespace Destiny\Enums;
 class GroupType implements Enum
 {
 
+    /**
+     *
+     */
     const GENERAL = 0;
+
+    /**
+     *
+     */
     const CLAN = 1;
 
     /**
+     * Returns the string version of the enum value
+     *
      * @param int $type
      * @return string
      */

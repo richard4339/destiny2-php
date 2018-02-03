@@ -45,6 +45,13 @@ use GuzzleHttp\Psr7\Response;
  */
 class ResponseMediator
 {
+
+    /**
+     * Helper function to convert the response into an array
+     *
+     * @param Response $response
+     * @return mixed
+     */
     public static function convertResponseToArray(Response $response)
     {
         return json_decode($response->getBody()->getContents(), true);

@@ -31,7 +31,8 @@ class GroupHomepage implements Enum
     const ALLIANCEFORUM = 2;
 
     /**
-     * Get the label for the supplied enum
+     * Returns the string version of the enum value
+     *
      * @param int $type
      * @return string
      */

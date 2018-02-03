@@ -29,6 +29,8 @@ class DestinyGameVersions implements Enum
     const DESTINY2 = 1;
 
     /**
+     * Returns the string version of the enum value
+     *
      * @param int $type
      * @return string
      */

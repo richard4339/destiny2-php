@@ -51,6 +51,8 @@ class BungieMembershipType implements Enum
     const BUNGIENEXT = 254;
 
     /**
+     * Returns the string version of the enum value
+     *
      * @param int $type
      * @return string
      */
