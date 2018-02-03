@@ -4,9 +4,7 @@
  * @author Richard Lynskey <richard@mozor.net>
  * @copyright Copyright (c) 2017-2018, Richard Lynskey
  * @license https://opensource.org/licenses/MIT MIT
- * @version 0.2.1
  *
- * Built 2017-09-23 09:51 CDT by richard
  *
  */
 

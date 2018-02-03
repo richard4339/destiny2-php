@@ -5,9 +5,6 @@
  * @author Toni Peric
  * @copyright Copyright (c) 2017, Richard Lynskey
  * @license https://opensource.org/licenses/MIT MIT
- * @version 0.1
- *
- * Built 2017-09-24 12:16 CDT by richard
  *
  * Based on the ResponseMediator Class from Toni Peric
  *
