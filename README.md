@@ -9,7 +9,7 @@ A PHP wrapper for the [Destiny 2 API](https://github.com/Bungie-net/api)
 [![Build Status](https://travis-ci.org/richard4339/destiny2-php.svg?branch=master)](https://travis-ci.org/richard4339/destiny2-php)
 
 ## About
-Currently includes (mostly) just the clan endpoints, with user endpoints coming soon.
+Currently includes (mostly) just the clan endpoints, with user endpoints coming soon. Basic vendor support has been added as well (Xur's hash is ```2190858386``` FYI).
 
 My intention is to make all object calls be JSON Serializable by implementing JsonSerializable()
 
@@ -21,7 +21,7 @@ composer require richard4339/destiny2-php
 
 ## Usage
 ```
-$client = new \Destiny\Client('[YOUR API KEY', 'OPTIONAL OAUTH TOKEN');
+$client = new \Destiny\Client('[YOUR API KEY]', '[OPTIONAL OAUTH TOKEN]', '[OPTIONAL CLIENT ID]', '[OPTIONAL CLIENT SECRET]');
   
 $clan = $client->getGroup(12345);
   
@@ -47,3 +47,4 @@ If you need assistance with the Destiny API, there are a bunch of great resource
 - [Destiny 2 API](https://github.com/Bungie-net/api)
 - [Manifest 101](https://gist.github.com/vpzed/94fc67ddb16c6d2e0494fda4ce6c9a3d)
 - [List of Projects](https://gist.github.com/vpzed/2e950d3a00c3539e242f7eb7b4b07288)
+- [Destiny.Plumbing](https://destiny.plumbing)
