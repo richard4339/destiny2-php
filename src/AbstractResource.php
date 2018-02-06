@@ -58,6 +58,14 @@ abstract class AbstractResource
     protected $casts = [];
 
     /**
+     * @var array Array of columns that will need to be casted to their own class (as an array)
+     * Example: ['property' => SomeClass::class]
+     *
+     * @since 0.2.2
+     */
+    protected $arrays = [];
+
+    /**
      * @var string[] Array of string columns that will need to be converted to dates using getDateTime() in lieu of get()
      */
     protected $dates = [];
@@ -135,7 +143,7 @@ abstract class AbstractResource
      */
     protected function isCastable($key)
     {
-        return array_key_exists($key, $this->casts) || is_int($key);
+        return array_key_exists($key, $this->casts) || array_key_exists($key, $this->arrays) || is_int($key);
     }
 
     /**
@@ -147,8 +155,8 @@ abstract class AbstractResource
      */
     protected function cast($key, $value)
     {
-        if (array_key_exists($key, $this->casts)) {
-            $class = $this->casts[$key];
+        if (array_key_exists($key, $this->arrays) && is_array($value) ) {
+            $class = $this->arrays[$key];
             return $this->setRawProperty($key, array_map(function ($item) use ($class) {
                 return $class::makeFromArray($item);
             }, $value));

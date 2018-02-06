@@ -166,8 +166,5 @@ composer.phar
 # Embedded web-server pid file
 /.web-server-pid
 
-# PHPDoc Cache
-/docs/cache
-
-# PHPDoc CheckStyle
-/docs/checkstyle.xml
+# PHPDoc
+/docs

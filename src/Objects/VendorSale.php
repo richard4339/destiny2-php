@@ -30,7 +30,7 @@ class VendorSale extends AbstractResource implements JsonSerializable
     /**
      * @var array Array of columns that will need to be casted to their own class
      */
-    protected $casts = [
+    protected $arrays = [
         'costs' => DestinyItemQuantity::class,
     ];
 
