@@ -69,9 +69,11 @@ abstract class AbstractResource
     protected $enums = [];
 
     /**
+     * @var string Default TimeZone to return data in
      *
+     * @since 0.2.2
      */
-    const TIMEZONE = 'UTC';
+    protected $timezone = 'UTC';
 
     /**
      * AbstractResource constructor.
@@ -237,14 +239,32 @@ abstract class AbstractResource
             $tz = null;
         }
 
-        $date = new DateTime($string);
-        $date->setTimezone(new DateTimeZone(self::TIMEZONE));
+        $date = self::createDateTime($string);
 
-        $timezone = new DateTimeZone($tz ?? self::TIMEZONE);
+        $timezone = new DateTimeZone($tz ?? $this->timezone);
 
         if ($date->getTimezone()->getName() != $timezone->getName()) {
             $date->setTimezone($timezone);
         }
+
+        return $date;
+    }
+
+    /**
+     * The Bungie API doesn't follow spec and reports the timezone as UTC despite it being Pacific. We have to manually fix this.
+     *
+     * @param null|string $date
+     * @return DateTime|null
+     */
+    private static function createDateTime(?string $date): ?DateTime
+    {
+        if (empty($date)) {
+            return new DateTime(null);
+        }
+
+        $initialDate = new DateTime($date, new DateTimeZone('America/Los_Angeles'));
+
+        $date = new DateTime($initialDate->format('Y-m-d\TH:i:s'), new DateTimeZone('America/Los_Angeles'));
 
         return $date;
     }

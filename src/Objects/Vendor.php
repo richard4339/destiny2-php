@@ -19,8 +19,8 @@ use JsonSerializable;
  *
  * @method int vendorHash()
  * @method \DateTime nextRefreshDate($tz = null)
- * @method boolean enabled()
- * @method boolean canPurchase()
+ * @method boolean enabled($default = false)
+ * @method boolean canPurchase($default = false)
  *
  * @link https://bungie-net.github.io/multi/schema_Destiny-Entities-Vendors-DestinyVendorComponent.html#schema_Destiny-Entities-Vendors-DestinyVendorComponent
  */

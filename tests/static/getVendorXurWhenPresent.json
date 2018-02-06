@@ -1,9 +1,55 @@
 {
   "Response": {
     "vendor": {
+      "data": {
+        "vendorHash": 2190858386,
+        "nextRefreshDate": "2018-02-09T09:00:00Z",
+        "enabled": true,
+        "canPurchase": false
+      },
       "privacy": 2
     },
     "categories": {
+      "data": {
+        "categories": [
+          {
+            "categoryIndex": 4,
+            "itemIndexes": [
+              53
+            ]
+          },
+          {
+            "categoryIndex": 5,
+            "itemIndexes": [
+              54
+            ]
+          },
+          {
+            "categoryIndex": 6,
+            "itemIndexes": [
+              66
+            ]
+          },
+          {
+            "categoryIndex": 7,
+            "itemIndexes": [
+              76
+            ]
+          },
+          {
+            "categoryIndex": 8,
+            "itemIndexes": [
+              90
+            ]
+          },
+          {
+            "categoryIndex": 9,
+            "itemIndexes": [
+              121
+            ]
+          }
+        ]
+      },
       "privacy": 2
     },
     "sales": {
