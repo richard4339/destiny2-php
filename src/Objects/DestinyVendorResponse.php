@@ -27,7 +27,7 @@ use JsonSerializable;
  * @property VendorSale[] $sales
  *
  */
-class DestinyVendorResponse extends AbstractResource //implements JsonSerializable
+class DestinyVendorResponse extends AbstractResource
 {
 
     /**

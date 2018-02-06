@@ -145,9 +145,16 @@ abstract class AbstractResource
      */
     protected function cast($key, $value)
     {
-        $class = is_int($key) ? $this->casts['all'] : $this->casts[$key];
+        if (array_key_exists($key, $this->casts)) {
+            $class = $this->casts[$key];
+            return $this->setRawProperty($key, array_map(function ($item) use ($class) {
+                return $class::makeFromArray($item);
+            }, $value));
+        } else {
+            $class = is_int($key) ? $this->casts['all'] : $this->casts[$key];
 
-        return $this->setRawProperty($key, $class::makeFromArray($value));
+            return $this->setRawProperty($key, $class::makeFromArray($value));
+        }
     }
 
     /**
@@ -194,11 +201,10 @@ abstract class AbstractResource
      */
     public function __call($name, $arguments)
     {
-        if(in_array($name, $this->dates)) {
+        if (in_array($name, $this->dates)) {
             return $this->getDateTime($name, $arguments);
         }
-        if($data = $this->get($name))
-        {
+        if ($data = $this->get($name)) {
             return $data;
         }
     }
@@ -209,7 +215,7 @@ abstract class AbstractResource
      * @param string|null $key
      * @param string $tz TimeZone string from the mentioned link
      * @return bool|DateTime
-     * 
+     *
      * @link https://secure.php.net/manual/en/timezones.php
      */
     public function getDateTime($key = null, $tz = null)
@@ -217,12 +223,12 @@ abstract class AbstractResource
 
         $string = $this->get($key);
 
-        if(empty($string)) {
+        if (empty($string)) {
             return false;
         }
 
-        if(is_array($tz)) {
-            if(!empty($tz)) {
+        if (is_array($tz)) {
+            if (!empty($tz)) {
                 $tz = $tz[0];
             } else {
                 $tz = null;
@@ -236,7 +242,7 @@ abstract class AbstractResource
 
         $timezone = new DateTimeZone($tz ?? self::TIMEZONE);
 
-        if($date->getTimezone()->getName() != $timezone->getName()) {
+        if ($date->getTimezone()->getName() != $timezone->getName()) {
             $date->setTimezone($timezone);
         }
 
