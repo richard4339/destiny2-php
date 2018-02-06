@@ -11,6 +11,7 @@ namespace Destiny\Objects;
 
 
 use Destiny\AbstractResource;
+use Destiny\Enums\VendorItemStatus;
 use JsonSerializable;
 
 /**
@@ -20,23 +21,34 @@ use JsonSerializable;
  * @method int vendorItemIndex()
  * @method string itemHash()
  * @method int quantity()
- * @method int saleStatus()
- *
- * @todo Sale status enum https://bungie-net.github.io/multi/schema_Destiny-VendorItemStatus.html#schema_Destiny-VendorItemStatus
+ * @method int saleStatus() VendorItemStatus enum
+ * @method DestinyItemQuantity[] costs()
  */
-class VendorSale extends AbstractResource //implements JsonSerializable
+class VendorSale extends AbstractResource implements JsonSerializable
 {
 
     /**
-     * Gets the cost values
-     *
-     * @return VendorSaleCost[]
+     * @var array Array of columns that will need to be casted to their own class
      */
-    public function costs()
+    protected $casts = [
+        'costs' => DestinyItemQuantity::class,
+    ];
+
+    /**
+     * Make JSON ready
+     *
+     * @return array
+     */
+    public function jsonSerialize()
     {
-        return array_map(function ($item) {
-            return VendorSaleCost::makeFromArray($item);
-        }, $this->get('costs'));
+        return [
+            'vendorItemIndex' => $this->vendorItemIndex(),
+            'itemHash' => $this->itemHash(),
+            'quantity' => $this->quantity(),
+            'saleStatus' => $this->saleStatus(),
+            'saleStatusLabel' => VendorItemStatus::getLabel($this->saleStatus()),
+            'costs' => $this->costs(),
+        ];
     }
 
 }

@@ -14,13 +14,14 @@ use Destiny\AbstractResource;
 use JsonSerializable;
 
 /**
- * Class VendorSaleCost
+ * Class DestinyItemQuantity
  * @package Destiny\Objects
  *
- * @method string itemHash()
- * @method int quantity()
+ * @method string itemHash() The hash identifier for the item in question. Use it to look up the item's DestinyInventoryItemDefinition.
+ * @method string itemInstanceId() If this quantity is referring to a specific instance of an item, this will have the item's instance ID. Normally, this will be null.
+ * @method int quantity() The amount of the item needed/available depending on the context of where DestinyItemQuantity is being used.
  */
-class VendorSaleCost extends AbstractResource //implements JsonSerializable
+class DestinyItemQuantity extends AbstractResource //implements JsonSerializable
 {
 
 }
