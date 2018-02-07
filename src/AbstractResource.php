@@ -155,7 +155,7 @@ abstract class AbstractResource
      */
     protected function cast($key, $value)
     {
-        if (array_key_exists($key, $this->arrays) && is_array($value) ) {
+        if (array_key_exists($key, $this->arrays) && is_array($value)) {
             $class = $this->arrays[$key];
             return $this->setRawProperty($key, array_map(function ($item) use ($class) {
                 return $class::makeFromArray($item);

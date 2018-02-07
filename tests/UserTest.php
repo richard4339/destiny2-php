@@ -7,46 +7,23 @@
  *
  */
 
+namespace Destiny\Tests;
+
 use Destiny\Client;
 
-class UserTest extends PHPUnit_Framework_TestCase
+class UserTest extends ClientOauthTestCase
 {
 
-    const TEST_OAUTH_TOKEN = 'ABC123';
-    const TEST_API_KEY = '26765207';
-    const TEST_CLANID = "2114315";
+    const TEST_ID = "2114315";
 
     /**
      * @expectedException \Destiny\Exceptions\ApiKeyException
      */
     public function testInvalidAPIKey()
     {
-        $client = new Client(self::TEST_API_KEY);
-        $client->setMock(__DIR__ . '/static/invalidApiKey.json');
+        $this->client->setMock(__DIR__ . '/static/invalidApiKey.json');
 
-        $client->getClanMembers(self::TEST_CLANID);
-    }
-
-    /**
-     * @expectedException \Destiny\Exceptions\OAuthException
-     */
-    public function testInvalidOAuthKey()
-    {
-        $client = new Client(self::TEST_API_KEY);
-        $client->setMock(__DIR__ . '/static/invalidApiKey.json', 401);
-
-        $client->getCurrentBungieUser();
-    }
-
-    /**
-     * @expectedException \Destiny\Exceptions\OAuthException
-     */
-    public function testMissingOAuthKeyWhenRequired()
-    {
-        $client = new Client(self::TEST_API_KEY);
-        $client->setMock(__DIR__ . '/static/getCurrentUser.json');
-
-        $client->getCurrentBungieUser();
+        $this->client->getCurrentBungieUser();
     }
 
     /**
@@ -54,10 +31,9 @@ class UserTest extends PHPUnit_Framework_TestCase
      */
     public function testGetCurrentDisplayName() {
 
-        $client = new Client(self::TEST_API_KEY, self::TEST_OAUTH_TOKEN);
-        $client->setMock(__DIR__ . '/static/getCurrentUser.json');
+        $this->client->setMock(__DIR__ . '/static/getCurrentUser.json');
 
-        $user = $client->getCurrentBungieUser();
+        $user = $this->client->getCurrentBungieUser();
 
         $this->assertEquals('ImASample', $user->displayName());
     }
@@ -67,10 +43,9 @@ class UserTest extends PHPUnit_Framework_TestCase
      */
     public function testInvalidGetCurrentDisplayName() {
 
-        $client = new Client(self::TEST_API_KEY, self::TEST_OAUTH_TOKEN);
-        $client->setMock(__DIR__ . '/static/getCurrentUser.json');
+        $this->client->setMock(__DIR__ . '/static/getCurrentUser.json');
 
-        $user = $client->getCurrentBungieUser();
+        $user = $this->client->getCurrentBungieUser();
 
         $this->assertNotEquals('ImABadName', $user->displayName());
     }
@@ -81,10 +56,9 @@ class UserTest extends PHPUnit_Framework_TestCase
      */
     public function testGetBungieUserInvalidID()
     {
-        $client = new Client(self::TEST_API_KEY);
-        $client->setMock(__DIR__ . '/static/getBungieUserInvalidID.json');
+        $this->client->setMock(__DIR__ . '/static/getBungieUserInvalidID.json');
 
-        $client->getBungieUser(self::TEST_CLANID);
+        $this->client->getBungieUser(self::TEST_ID);
     }
 
 }

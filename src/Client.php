@@ -464,6 +464,8 @@ class Client
      * @throws ClientException
      * @throws OAuthException
      *
+     * Requires an OAuth token
+     *
      * @todo Support VendorCategories, cannot currently handle multiple vendors being passed by leaving vendor null
      *
      * @link https://bungie-net.github.io/multi/operation_get_Destiny2-GetVendor.html#operation_get_Destiny2-GetVendor
@@ -472,6 +474,10 @@ class Client
      */
     public function getVendor($membershipType, string $membershipID, string $characterID, ?string $vendor = null, ...$components)
     {
+        if (empty($this->_oauthToken)) {
+            throw new OAuthException('401 Unauthorized');
+        }
+
         // Check to see if the supplied membershipType is a number. If not, convert it to the label
         if (is_int($membershipType)) {
             $membershipType = BungieMembershipType::getLabel($membershipType);
