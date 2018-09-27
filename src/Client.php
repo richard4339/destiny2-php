@@ -23,6 +23,7 @@ use Destiny\Objects\DestinyVendorResponse;
 use Destiny\Objects\GeneralUser;
 use Destiny\Objects\GroupMember;
 use Destiny\Objects\GroupResponse;
+use Destiny\Objects\PublicPartnershipDetail;
 use Destiny\Objects\Vendor;
 use Destiny\Objects\VendorSale;
 use GuzzleHttp\Exception\ClientException as GuzzleClientException;
@@ -523,6 +524,26 @@ class Client
 
         return $profileResponse;
 
+    }
+
+    /**
+     * @param int $userID
+     * @return PublicPartnershipDetail
+     *
+     * @throws ApiKeyException
+     * @throws ClientException
+     * @throws OAuthException
+     *
+     * @link https://bungie-net.github.io/multi/operation_get_User-GetPartnerships.html#operation_get_User-GetPartnerships
+     */
+    public function getPartnerships($userID)
+    {
+        $response = $this->request($this->_buildRequestString('User', [$userID, 'Partnerships']));
+
+        if(empty($response['Response'])) {
+            throw new ClientException('No results found');
+        }
+        return PublicPartnershipDetail::makeFromArray($response['Response'][0]);
     }
 
     /**
