@@ -53,7 +53,8 @@ class GroupMember extends AbstractResource implements JsonSerializable
      *
      * @return string
      */
-    public function memberTypeLabel() {
+    public function memberTypeLabel()
+    {
         return RuntimeGroupMemberType::getLabel($this->memberType());
     }
 
@@ -64,15 +65,23 @@ class GroupMember extends AbstractResource implements JsonSerializable
      */
     public function jsonSerialize()
     {
-        return [
-            'bungieDisplayName' => $this->bungieNetUserInfo()->displayName(),
+        $return = [
             'memberType' => $this->memberType(),
             'isOnline' => $this->isOnline(),
             'groupId' => $this->groupId(),
             'joinDate' => $this->joinDate(),
             'destinyUserInfo' => $this->destinyUserInfo(),
-            'bungieNetUserInfo' => $this->bungieNetUserInfo()
         ];
+
+        try {
+            $return['bungieDisplayName'] = $this->bungieNetUserInfo()->displayName();
+            $return['bungieNetUserInfo'] = $this->bungieNetUserInfo();
+        } catch (\Throwable $x) {
+            $return['bungieDisplayName'] = '';
+            $return['bungieNetUserInfo'] = null;
+        }
+
+        return $return;
     }
 
 }
