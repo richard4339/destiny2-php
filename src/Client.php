@@ -76,6 +76,37 @@ class Client
     protected $_httpClient;
 
     /**
+     * Used for User-Agent field
+     * @var string
+     */
+    protected $_appName;
+
+    /**
+     * Used for User-Agent field
+     * @var string
+     */
+    protected $_appVersion;
+
+    /**
+     * Used for User-Agent field
+     * @var string
+     */
+    protected $_appIDNumber;
+
+    /**
+     * Used for User-Agent field
+     * Do not include http:// or similar, ex. www.sample.net
+     * @var string
+     */
+    protected $_appURL;
+
+    /**
+     * Used for User-Agent field
+     * @var string
+     */
+    protected $_appEmail;
+
+    /**
      * Client constructor.
      * @param string $apiKey
      * @param null|string $token
@@ -83,7 +114,7 @@ class Client
      * @param null|string $clientSecret
      * @throws ApiKeyException
      */
-    function __construct(string $apiKey = '', ?string $token = null, ?string $clientID = null, ?string $clientSecret = null)
+    function __construct(string $apiKey = '', ?string $token = null, ?string $clientID = null, ?string $clientSecret = null, ?string $appName = '', ?string $appVersion = '', ?string $appIDNumber = '', ?string $appURL = '', ?string $appEmail = '')
     {
         if (empty($apiKey)) {
             $apiKey = $_ENV["APIKEY"];
@@ -105,6 +136,26 @@ class Client
 
         if (!empty($clientSecret)) {
             $this->_clientSecret = $clientSecret;
+        }
+
+        if (!empty($appName)) {
+            $this->_appName = $appName;
+        }
+
+        if (!empty($appVersion)) {
+            $this->_appVersion = $appVersion;
+        }
+
+        if (!empty($appIDNumber)) {
+            $this->_appIDNumber = $appIDNumber;
+        }
+
+        if (!empty($appURL)) {
+            $this->_appURL = $appURL;
+        }
+
+        if (!empty($appEmail)) {
+            $this->_appEmail = $appEmail;
         }
     }
 
@@ -130,11 +181,12 @@ class Client
     }
 
     /**
-     * @param string $url
+     * @param $url
      * @return mixed
      * @throws ApiKeyException
      * @throws ClientException
      * @throws OAuthException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     protected function request($url)
     {
@@ -143,7 +195,10 @@ class Client
             throw new ApiKeyException("API Key is not set");
         }
 
+        $userAgent = sprintf('%s/%s AppId/%s (+%s;%s)', $this->_appName ?? '', $this->_appVersion ?? '', $this->_appIDNumber ?? '', $this->_appURL ?? '', $this->_appEmail ?? '');
+
         $headers = [
+            'User-Agent' => $userAgent,
             'X-Api-Key' => $this->_apiKey
         ];
 
@@ -512,11 +567,11 @@ class Client
         $response = $this->request($this->_buildRequestString('Destiny2', $uriParams, ['components' => implode(',', $params)]));
 
         $profileResponse = new DestinyVendorResponse();
-        if(isset($response['Response']['vendor']['data'])) {
+        if (isset($response['Response']['vendor']['data'])) {
             $profileResponse->vendor = Vendor::makeFromArray($response['Response']['vendor']['data']);
         }
 
-        if(isset($response['Response']['sales']['data'])) {
+        if (isset($response['Response']['sales']['data'])) {
             $profileResponse->sales = array_map(function ($item) {
                 return VendorSale::makeFromArray($item);
             }, $response['Response']['sales']['data']);
@@ -540,7 +595,7 @@ class Client
     {
         $response = $this->request($this->_buildRequestString('User', [$userID, 'Partnerships']));
 
-        if(empty($response['Response'])) {
+        if (empty($response['Response'])) {
             throw new ClientException('No results found');
         }
         return PublicPartnershipDetail::makeFromArray($response['Response'][0]);
