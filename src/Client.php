@@ -181,18 +181,24 @@ class Client
     }
 
     /**
-     * @param $url
+     * @param string $url
+     * @param string $method
      * @return mixed
      * @throws ApiKeyException
      * @throws ClientException
      * @throws OAuthException
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    protected function request($url)
+    protected function request($url, string $method = 'GET', array $extraParameters = null)
     {
 
         if (empty($this->_apiKey)) {
             throw new ApiKeyException("API Key is not set");
+        }
+
+        $method = strtoupper($method);
+        if ($method != 'POST') {
+            $method = 'GET';
         }
 
         $userAgent = sprintf('%s/%s AppId/%s (+%s;%s)', $this->_appName ?? '', $this->_appVersion ?? '', $this->_appIDNumber ?? '', $this->_appURL ?? '', $this->_appEmail ?? '');
@@ -206,11 +212,17 @@ class Client
             $headers['Authorization'] = sprintf('Bearer %s', $this->_oauthToken);
         }
 
+        $params = [
+            'headers' => $headers
+        ];
+
+        if (!empty($extraParameters)) {
+            $params = array_merge($params, $extraParameters);
+        }
+
         try {
             $response = $this->getHttpClient()
-                ->request('GET', $url, [
-                    'headers' => $headers
-                ]);
+                ->request($method, $url, $params);
         } catch (GuzzleClientException $x) {
             switch ($x->getCode()) {
                 case 401:
@@ -360,6 +372,155 @@ class Client
         return array_map(function ($item) {
             return GroupMember::makeFromArray($item);
         }, $response['Response']['results']);
+    }
+
+
+    /**
+     * @param $clanID
+     * @param int $currentPage
+     * @return GroupMember[]
+     *
+     * Requires an OAuth token
+     *
+     * @link https://bungie-net.github.io/multi/operation_get_GroupV2-GetBannedMembersOfGroup.html#operation_get_GroupV2-GetBannedMembersOfGroup
+     */
+    public function getClanBannedMembers($clanID, $currentPage = 1)
+    {
+        if (empty($this->_oauthToken)) {
+            throw new OAuthException('401 Unauthorized');
+        }
+
+        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'Banned'],
+            ['currentPage' => $currentPage]));
+
+        return array_map(function ($item) {
+            return GroupMember::makeFromArray($item);
+        }, $response['Response']['results']);
+    }
+
+    /**
+     * @param $clanID
+     * @param int $currentPage
+     * @return GroupMember[]
+     *
+     * Requires an OAuth token
+     *
+     * @link https://bungie-net.github.io/multi/operation_get_GroupV2-GetPendingMemberships.html#operation_get_GroupV2-GetPendingMemberships
+     */
+    public function getClanPendingMembers($clanID, $currentPage = 1)
+    {
+        if (empty($this->_oauthToken)) {
+            throw new OAuthException('401 Unauthorized');
+        }
+
+        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'Members', 'Pending'],
+            ['currentPage' => $currentPage]));
+
+        return array_map(function ($item) {
+            return GroupMember::makeFromArray($item);
+        }, $response['Response']['results']);
+    }
+
+    /**
+     * @param $clanID
+     * @param int $currentPage
+     * @return GroupMember[]
+     *
+     * Requires an OAuth token
+     *
+     * @link https://bungie-net.github.io/multi/operation_get_GroupV2-GetInvitedIndividuals.html#operation_get_GroupV2-GetInvitedIndividuals
+     */
+    public function getClanInvitedMembers($clanID, $currentPage = 1)
+    {
+        if (empty($this->_oauthToken)) {
+            throw new OAuthException('401 Unauthorized');
+        }
+
+        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'Members', 'InvitedIndividuals'],
+            ['currentPage' => $currentPage]));
+
+        return array_map(function ($item) {
+            return GroupMember::makeFromArray($item);
+        }, $response['Response']['results']);
+    }
+
+    /**
+     * @param int $clanID
+     * @param int|string $membershipType
+     * @param int|string $membershipID
+     * @return mixed
+     * @throws ApiKeyException
+     * @throws ClientException
+     * @throws OAuthException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     *
+     * Requires an OAuth token
+     *
+     * @link
+     */
+    public function clanKickMember(int $clanID, $membershipType, $membershipID)
+    {
+        if (empty($this->_oauthToken)) {
+            throw new OAuthException('401 Unauthorized');
+        }
+
+        // Check to see if the supplied membershipType is a number. If not, convert it to the label
+        if (is_int($membershipType)) {
+            $membershipType = BungieMembershipType::getLabel($membershipType);
+        }
+        if ($membershipType == "None" || $membershipType == "") {
+            throw new ClientException('An invalid MembershipType was supplied.');
+        }
+
+        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'Members', $membershipType, $membershipID, 'Kick']), 'POST');
+
+        return $response;
+    }
+
+    /**
+     * @param int $clanID
+     * @param int|string $membershipType
+     * @param int|string $membershipID
+     * @return bool
+     *
+     * @throws ApiKeyException
+     * @throws ClientException
+     * @throws OAuthException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     *
+     * Requires an OAuth token
+     *
+     * 2link https://bungie-net.github.io/multi/operation_post_GroupV2-ApprovePending.html#operation_post_GroupV2-ApprovePending
+     */
+    public function clanApproveMember(int $clanID, $membershipType, $membershipID)
+    {
+        if (empty($this->_oauthToken)) {
+            throw new OAuthException('401 Unauthorized');
+        }
+
+        // Check to see if the supplied membershipType is a number. If not, convert it to the label
+        if (is_int($membershipType)) {
+            $membershipType = BungieMembershipType::getLabel($membershipType);
+        }
+        if ($membershipType == "None" || $membershipType == "") {
+            throw new ClientException('An invalid MembershipType was supplied.');
+        }
+
+        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'Members', 'Approve', $membershipType, $membershipID]), 'POST',
+            ['json' =>
+                [
+                    'message' => ''
+                ]
+            ]);
+
+        if($response['Reponse'] === true) {
+            return true;
+        } else {
+            throw new ClientException($response['Message'], $response['ErrorCode'], $response['ThrottleSeconds'],
+                $response['ErrorStatus']);
+        }
+
+        return false;
     }
 
     /**
