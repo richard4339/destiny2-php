@@ -132,3 +132,7 @@ If you need assistance with the Destiny API, there are a bunch of great resource
 - [Manifest 101](https://gist.github.com/vpzed/94fc67ddb16c6d2e0494fda4ce6c9a3d)
 - [List of Projects](https://gist.github.com/vpzed/2e950d3a00c3539e242f7eb7b4b07288)
 - [Destiny.Plumbing](https://destiny.plumbing)
+
+And specifically the devs below who build and maintain these community resources
+- [Josh Hunt](https://github.com/joshhunt)
+- [lowlines](https://github.com/lowlines)
