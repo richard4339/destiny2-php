@@ -247,7 +247,7 @@ abstract class AbstractResource
             $tz = null;
         }
 
-        $date = self::createDateTime($string);
+        $date = new DateTime($string);
 
         $timezone = new DateTimeZone($tz ?? $this->timezone);
 
@@ -263,6 +263,9 @@ abstract class AbstractResource
      *
      * @param null|string $date
      * @return DateTime|null
+     *
+     * @deprecated 0.2.5 The UTC/Pacific conversion may have been a misunderstanding, regardless it no longer appears to occur. Removing it soon as the lone function call is being removed.
+     * @link https://github.com/Bungie-net/api/issues/353
      */
     private static function createDateTime(?string $date): ?DateTime
     {
