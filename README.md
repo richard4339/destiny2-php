@@ -21,6 +21,8 @@ composer require richard4339/destiny2-php
 
 ## Usage
 ```
+require 'vendor/autoload.php';
+
 $client = new \Destiny\Client('[YOUR API KEY]', '[OPTIONAL OAUTH TOKEN]', '[OPTIONAL CLIENT ID]', '[OPTIONAL CLIENT SECRET]', '[OPTIONAL YOUR APP NAME]', '[OPTIONAL YOUR APP VERSION]', '[OPTIONAL YOUR APP ID]', '[OPTIONAL YOUR APP URL]', '[OPTIONAL YOUR APP EMAIL]');
   
 $clan = $client->getGroup(12345);
@@ -70,14 +72,31 @@ use Destiny\Client;
 use Symfony\Component\Security\Core\Security;
 
 
+/**
+ * Class BungieOAuthRequest
+ * @package App\Services
+ */
 class BungieOAuthRequest extends Client
 {
+
+    /**
+     * BungieOAuthRequest constructor.
+     * @param Security $security
+     * @param string $apiKey
+     * @param null|string $clientID
+     * @param null|string $clientSecret
+     * @param null|string $appName
+     * @param null|string $appVersion
+     * @param null|string $appIDNumber
+     * @param null|string $appURL
+     * @param null|string $appEmail
+     * @throws \Destiny\Exceptions\ApiKeyException
+     */
     public function __construct(Security $security, string $apiKey = '', ?string $clientID = null, ?string $clientSecret = null, ?string $appName = '', ?string $appVersion = '', ?string $appIDNumber = '', ?string $appURL = '', ?string $appEmail = '')
     {
         $user = $security->getUser();
 
         $token = $user->getBungieAccessToken();
-        
         parent::__construct($apiKey, $token, $clientID, $clientSecret, $appName, $appVersion, $appIDNumber, $appURL, $appEmail);
     }
 }
