@@ -24,6 +24,7 @@ use Destiny\Objects\GeneralUser;
 use Destiny\Objects\GroupMember;
 use Destiny\Objects\GroupResponse;
 use Destiny\Objects\PublicPartnershipDetail;
+use Destiny\Objects\UserMembership;
 use Destiny\Objects\Vendor;
 use Destiny\Objects\VendorSale;
 use GuzzleHttp\Exception\ClientException as GuzzleClientException;
@@ -509,6 +510,51 @@ class Client
         $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'Members', 'Approve', $membershipType, $membershipID]), 'POST',
             ['json' =>
                 [
+                    'message' => ''
+                ]
+            ]);
+
+        if($response['Response'] === true) {
+            return true;
+        } else {
+            throw new ClientException($response['Message'], $response['ErrorCode'], $response['ThrottleSeconds'],
+                $response['ErrorStatus']);
+        }
+
+        return false;
+    }
+
+    /**
+     * @param int $clanID
+     * @param int|string $membershipType
+     * @param int|string $membershipID
+     * @param string $displayName
+     * @return bool
+     * @throws ApiKeyException
+     * @throws ClientException
+     * @throws OAuthException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     *
+     * @todo The return is currently broken
+     */
+    public function clanDenyMember(int $clanID, $membershipType, $membershipID, string $displayName) {
+
+        if (empty($this->_oauthToken)) {
+            throw new OAuthException('401 Unauthorized');
+        }
+
+        // Check to see if the supplied membershipType is a number. If not, convert it to the label
+        if (is_int($membershipType)) {
+            $membershipType = BungieMembershipType::getLabel($membershipType);
+        }
+
+        $member = new UserMembership($membershipType, $membershipID, $displayName);
+
+        ///GroupV2/{groupId}/Members/DenyList/
+        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'Members', 'DenyList']), 'POST',
+            ['json' =>
+                [
+                    'memberships' => [json_decode(json_encode($member))],
                     'message' => ''
                 ]
             ]);

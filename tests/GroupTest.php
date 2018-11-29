@@ -62,4 +62,11 @@ class GroupTest extends ClientOauthTestCase
 
     }
 
+    /**
+     * @todo This test is currently designed to fail since the method does not properly return a value
+     */
+    public function testClanDenyMember() {
+        $this->assertEquals(1, 2);
+    }
+
 }
