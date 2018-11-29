@@ -490,7 +490,7 @@ class Client
      *
      * Requires an OAuth token
      *
-     * 2link https://bungie-net.github.io/multi/operation_post_GroupV2-ApprovePending.html#operation_post_GroupV2-ApprovePending
+     * @link https://bungie-net.github.io/multi/operation_post_GroupV2-ApprovePending.html#operation_post_GroupV2-ApprovePending
      */
     public function clanApproveMember(int $clanID, $membershipType, $membershipID)
     {
@@ -513,7 +513,7 @@ class Client
                 ]
             ]);
 
-        if($response['Reponse'] === true) {
+        if($response['Response'] === true) {
             return true;
         } else {
             throw new ClientException($response['Message'], $response['ErrorCode'], $response['ThrottleSeconds'],
