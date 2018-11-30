@@ -39,6 +39,8 @@ use GuzzleHttp\Psr7\Response;
 /**
  * Class ResponseMediator
  * @package Destiny
+ *
+ * @deprecated 0.2.5 This logic has been moved into Client directly
  */
 class ResponseMediator
 {

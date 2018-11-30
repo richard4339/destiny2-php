@@ -226,7 +226,7 @@ class Client
 
         $response = $this->internalRequest($url, $method, $extraParameters);
 
-        $body = $this->convertResponse($response);
+        $body = self::convertResponseToArray($response);
 
         switch ($body['ErrorCode']) {
             case 1:
@@ -241,15 +241,6 @@ class Client
                     $body['ErrorStatus']);
                 break;
         }
-    }
-
-    /**
-     * @param Response $response
-     * @return mixed
-     */
-    protected function convertResponse(Response $response)
-    {
-        return ResponseMediator::convertResponseToArray($response);
     }
 
     /**
@@ -319,6 +310,28 @@ class Client
         }
 
         return $this->_httpClient;
+    }
+
+    /**
+     * Helper function to convert the response into an array
+     *
+     * @param Response $response
+     * @return mixed
+     */
+    public static function convertResponseToArray(Response $response)
+    {
+        return json_decode(self::getResponseBody($response), true);
+    }
+
+    /**
+     * Helper function to get the response body.
+     *
+     * @param Response $response
+     * @return bool|string
+     */
+    public static function getResponseBody(Response $response)
+    {
+        return $response->getBody()->getContents();
     }
 
     /**
@@ -846,8 +859,6 @@ class Client
      */
     public function setMock($responseFile, $statusCode = 200)
     {
-
-
         $mock = new MockHandler([
             new Response($statusCode, ['Content-Type' => 'application/json'], file_get_contents($responseFile))
         ]);
