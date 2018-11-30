@@ -168,3 +168,6 @@ composer.phar
 
 # PHPDoc
 /docs
+
+# Mock
+/src/mock/
