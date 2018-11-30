@@ -51,6 +51,17 @@ class ResponseMediator
      */
     public static function convertResponseToArray(Response $response)
     {
-        return json_decode($response->getBody()->getContents(), true);
+        return json_decode(self::getResponseBody($response), true);
+    }
+
+    /**
+     * Helper function to get the response body.
+     *
+     * @param Response $response
+     * @return bool|string
+     */
+    public static function getResponseBody(Response $response)
+    {
+        return $response->getBody()->getContents();
     }
 }

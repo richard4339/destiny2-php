@@ -183,6 +183,36 @@ class Client
     }
 
     /**
+     * Get a Bungie group either by name with grouptype or by groupID (grouptype is ignored with a groupID).
+     * Note that a group with a numeric only name will not work here as this function will see it as a groupID
+     *
+     * There is a bug currently in the Bungie API that is causing lookup by name to not always function when names have
+     * a space in them. See https://github.com/Bungie-net/api/issues/162
+     *
+     * @param string|int $group
+     * @param string|int $groupType
+     * @return GroupResponse
+     *
+     * @throws ApiKeyException
+     * @throws ClientException
+     * @throws OAuthException
+     *
+     * OAuth token optional. Passing an OAuth token for a user in the requested group will cause it to return more info.
+     *
+     * @link https://bungie-net.github.io/multi/operation_get_GroupV2-GetGroupByName.html#operation_get_GroupV2-GetGroupByName
+     * @link https://bungie-net.github.io/multi/operation_get_GroupV2-GetGroup.html#operation_get_GroupV2-GetGroup
+     */
+    public function getGroup($group, $groupType = GroupType::CLAN)
+    {
+        if (is_integer($group)) {
+            $response = $this->request($this->_buildRequestString('GroupV2', [$group]));
+        } else {
+            $response = $this->request($this->_buildRequestString('GroupV2', ['Name', $group, $groupType]));
+        }
+        return GroupResponse::makeFromArray($response['Response']);
+    }
+
+    /**
      * @param string $url
      * @param string $method
      * @return mixed
@@ -196,7 +226,7 @@ class Client
 
         $response = $this->internalRequest($url, $method, $extraParameters);
 
-        $body = ResponseMediator::convertResponseToArray($response);
+        $body = $this->convertResponse($response);
 
         switch ($body['ErrorCode']) {
             case 1:
@@ -211,6 +241,15 @@ class Client
                     $body['ErrorStatus']);
                 break;
         }
+    }
+
+    /**
+     * @param Response $response
+     * @return mixed
+     */
+    protected function convertResponse(Response $response)
+    {
+        return ResponseMediator::convertResponseToArray($response);
     }
 
     /**
@@ -299,62 +338,6 @@ class Client
     }
 
     /**
-     * @param string[]|int[] $components
-     * @param string[]|int[] $allowedComponents
-     * @return bool
-     */
-    protected static function _validateComponents(array $components, array $allowedComponents): bool
-    {
-        $allowed = [];
-        foreach ($allowedComponents as $i) {
-            if (is_int($i)) {
-                $allowed[] = DestinyComponentType::getLabel($i);
-            } else {
-                $allowed[] = $i;
-            }
-        }
-        foreach ($components as $i) {
-            if (is_int($i)) {
-                $i = DestinyComponentType::getLabel($i);
-            }
-            if (!in_array($i, $allowed)) {
-                return false;
-            }
-            return true;
-        }
-    }
-
-    /**
-     * Get a Bungie group either by name with grouptype or by groupID (grouptype is ignored with a groupID).
-     * Note that a group with a numeric only name will not work here as this function will see it as a groupID
-     *
-     * There is a bug currently in the Bungie API that is causing lookup by name to not always function when names have
-     * a space in them. See https://github.com/Bungie-net/api/issues/162
-     *
-     * @param string|int $group
-     * @param string|int $groupType
-     * @return GroupResponse
-     *
-     * @throws ApiKeyException
-     * @throws ClientException
-     * @throws OAuthException
-     *
-     * OAuth token optional. Passing an OAuth token for a user in the requested group will cause it to return more info.
-     *
-     * @link https://bungie-net.github.io/multi/operation_get_GroupV2-GetGroupByName.html#operation_get_GroupV2-GetGroupByName
-     * @link https://bungie-net.github.io/multi/operation_get_GroupV2-GetGroup.html#operation_get_GroupV2-GetGroup
-     */
-    public function getGroup($group, $groupType = GroupType::CLAN)
-    {
-        if (is_integer($group)) {
-            $response = $this->request($this->_buildRequestString('GroupV2', [$group]));
-        } else {
-            $response = $this->request($this->_buildRequestString('GroupV2', ['Name', $group, $groupType]));
-        }
-        return GroupResponse::makeFromArray($response['Response']);
-    }
-
-    /**
      * @param $clanID
      * @param int $currentPage
      * @return GroupMember[]
@@ -395,7 +378,6 @@ class Client
             return GroupMember::makeFromArray($item);
         }, $response['Response']['results']);
     }
-
 
     /**
      * @param $clanID
@@ -808,6 +790,32 @@ class Client
 
         return $profileResponse;
 
+    }
+
+    /**
+     * @param string[]|int[] $components
+     * @param string[]|int[] $allowedComponents
+     * @return bool
+     */
+    protected static function _validateComponents(array $components, array $allowedComponents): bool
+    {
+        $allowed = [];
+        foreach ($allowedComponents as $i) {
+            if (is_int($i)) {
+                $allowed[] = DestinyComponentType::getLabel($i);
+            } else {
+                $allowed[] = $i;
+            }
+        }
+        foreach ($components as $i) {
+            if (is_int($i)) {
+                $i = DestinyComponentType::getLabel($i);
+            }
+            if (!in_array($i, $allowed)) {
+                return false;
+            }
+            return true;
+        }
     }
 
     /**
