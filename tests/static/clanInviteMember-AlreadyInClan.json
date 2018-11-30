@@ -1,0 +1,7 @@
+{
+  "ErrorCode": 676,
+  "ThrottleSeconds": 0,
+  "ErrorStatus": "ClanInviteAlreadyMember",
+  "Message": "The user is already a member of this Clan.",
+  "MessageData": {}
+}

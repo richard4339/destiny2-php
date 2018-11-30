@@ -76,7 +76,8 @@ class GroupTest extends ClientOauthTestCase
     /**
      *
      */
-    public function testGetClanInvitedMemberName() {
+    public function testGetClanInvitedMemberName()
+    {
         $this->client->setMock(__DIR__ . '/static/getClanInvitedMembers.json');
 
         $users = $this->client->getClanInvitedMembers(self::TEST_CLANID);
@@ -87,7 +88,8 @@ class GroupTest extends ClientOauthTestCase
     /**
      *
      */
-    public function testGetClanInvitedMemberDateInvited() {
+    public function testGetClanInvitedMemberDateInvited()
+    {
         $this->client->setMock(__DIR__ . '/static/getClanInvitedMembers.json');
 
         $users = $this->client->getClanInvitedMembers(self::TEST_CLANID);
@@ -161,6 +163,79 @@ class GroupTest extends ClientOauthTestCase
 
         $results = $this->client->clanDenyMember(self::TEST_CLANID, BungieMembershipType::TIGERPSN, '12345', 'SomeUser');
         $this->assertEquals(true, $results);
+    }
+
+    /**
+     * Test inviting a member to a clan that they are not currently accepted into
+     */
+    public function testClanInviteMemberSuccess()
+    {
+        $this->client->setMock(__DIR__ . '/static/clanInviteMember.json');
+
+        $results = $this->client->clanInviteMember(self::TEST_CLANID, BungieMembershipType::TIGERPSN, '12345');
+        $this->assertEquals(true, $results);
+    }
+
+    /**
+     * Test inviting a member to a clan that they are already invited into
+     * Note that the API treats this as if they have not already been invited
+     */
+    public function testClanInviteMemberSuccessAlreadyInvited()
+    {
+        $this->client->setMock(__DIR__ . '/static/clanInviteMember.json');
+
+        $results = $this->client->clanInviteMember(self::TEST_CLANID, BungieMembershipType::TIGERPSN, '12345');
+        $this->assertEquals(true, $results);
+
+    }
+
+    /**
+     * Test inviting a member to a clan that they are already a member of
+     *
+     * @expectedException \Destiny\Exceptions\ClientException
+     * @expectedExceptionCode 676
+     */
+    public function testClanInviteMemberSuccessAlreadyInClan()
+    {
+        $this->client->setMock(__DIR__ . '/static/clanInviteMember-AlreadyInClan.json');
+
+        $this->client->clanInviteMember(self::TEST_CLANID, BungieMembershipType::TIGERPSN, '12345');
+    }
+
+    /**
+     * Test cancelling a member invitation
+     */
+    public function testClanInviteMemberCancelSuccess()
+    {
+        $this->client->setMock(__DIR__ . '/static/clanInviteMemberCancel.json');
+
+        $results = $this->client->clanInviteMemberCancel(self::TEST_CLANID, BungieMembershipType::TIGERPSN, '12345');
+        $this->assertEquals(true, $results);
+    }
+
+    /**
+     * Test cancelling a member invitation when the member is not invited
+     * Note that the API treats this as if they have been invited
+     */
+    public function testClanInviteMemberCancelNotInvited()
+    {
+        $this->client->setMock(__DIR__ . '/static/clanInviteMemberCancel.json');
+
+        $results = $this->client->clanInviteMemberCancel(self::TEST_CLANID, BungieMembershipType::TIGERPSN, '12345');
+        $this->assertEquals(true, $results);
+    }
+
+    /**
+     * Test cancelling a clan invitation for a clan you do not have access to manage
+     *
+     * @expectedException \Destiny\Exceptions\AuthException
+     * @expectedExceptionCode 12
+     */
+    public function testClanInviteMemberCancelAccessDenied()
+    {
+        $this->client->setMock(__DIR__ . '/static/clanInviteMemberCancel-AccessDenied.json');
+
+        $this->client->clanInviteMemberCancel(self::TEST_CLANID, BungieMembershipType::TIGERPSN, '12345');
     }
 
 }

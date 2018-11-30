@@ -13,6 +13,7 @@ namespace Destiny;
 use Destiny\Enums\BungieMembershipType;
 use Destiny\Enums\DestinyComponentType;
 use Destiny\Enums\GroupType;
+use Destiny\Exceptions\AuthException;
 use Destiny\Exceptions\ClientException;
 use Destiny\Exceptions\ApiKeyException;
 use Destiny\Exceptions\OAuthException;
@@ -195,8 +196,10 @@ class Client
      * @return GroupResponse
      *
      * @throws ApiKeyException
+     * @throws AuthException
      * @throws ClientException
      * @throws OAuthException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * OAuth token optional. Passing an OAuth token for a user in the requested group will cause it to return more info.
      *
@@ -216,15 +219,16 @@ class Client
     /**
      * @param string $url
      * @param string $method
+     * @param array|null $extraParameters
      * @return mixed
      * @throws ApiKeyException
      * @throws ClientException
      * @throws OAuthException
+     * @throws AuthException
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
     protected function request($url, string $method = 'GET', array $extraParameters = null)
     {
-
         $response = $this->internalRequest($url, $method, $extraParameters);
 
         $body = $this->convertResponseToArray($response);
@@ -232,6 +236,10 @@ class Client
         switch ($body['ErrorCode']) {
             case 1:
                 return $body;
+                break;
+            case 12:
+                throw new AuthException($body['Message'], $body['ErrorCode'], $body['ThrottleSeconds'],
+                    $body['ErrorStatus']);
                 break;
             case 2101:
                 throw new ApiKeyException($body['Message'], $body['ErrorCode'], $body['ThrottleSeconds'],
@@ -290,7 +298,7 @@ class Client
         } catch (GuzzleClientException $x) {
             switch ($x->getCode()) {
                 case 401:
-                    throw new OAuthException('401 Unauthorized');
+                    throw new OAuthException();
                     break;
                 default:
                     throw $x;
@@ -357,8 +365,10 @@ class Client
      * @return GroupMember[]
      *
      * @throws ApiKeyException
+     * @throws AuthException
      * @throws ClientException
      * @throws OAuthException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * @link https://bungie-net.github.io/multi/operation_get_GroupV2-GetMembersOfGroup.html#operation_get_GroupV2-GetMembersOfGroup
      */
@@ -378,8 +388,10 @@ class Client
      * @return GroupMember[]
      *
      * @throws ApiKeyException
+     * @throws AuthException
      * @throws ClientException
      * @throws OAuthException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * @link https://bungie-net.github.io/multi/operation_get_GroupV2-GetAdminsAndFounderOfGroup.html#operation_get_GroupV2-GetAdminsAndFounderOfGroup
      */
@@ -398,6 +410,12 @@ class Client
      * @param int $currentPage
      * @return GroupMember[]
      *
+     * @throws ApiKeyException
+     * @throws AuthException
+     * @throws ClientException
+     * @throws OAuthException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     *
      * Requires an OAuth token
      *
      * @link https://bungie-net.github.io/multi/operation_get_GroupV2-GetBannedMembersOfGroup.html#operation_get_GroupV2-GetBannedMembersOfGroup
@@ -405,7 +423,7 @@ class Client
     public function getClanBannedMembers($clanID, $currentPage = 1)
     {
         if (empty($this->_oauthToken)) {
-            throw new OAuthException('401 Unauthorized');
+            throw new OAuthException();
         }
 
         $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'Banned'],
@@ -432,7 +450,7 @@ class Client
     public function getClanPendingMembers($clanID, $currentPage = 1)
     {
         if (empty($this->_oauthToken)) {
-            throw new OAuthException('401 Unauthorized');
+            throw new OAuthException();
         }
 
         $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'Members', 'Pending'],
@@ -459,7 +477,7 @@ class Client
     public function getClanInvitedMembers($clanID, $currentPage = 1)
     {
         if (empty($this->_oauthToken)) {
-            throw new OAuthException('401 Unauthorized');
+            throw new OAuthException();
         }
 
         $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'Members', 'InvitedIndividuals'],
@@ -487,7 +505,7 @@ class Client
     public function clanKickMember(int $clanID, $membershipType, $membershipID)
     {
         if (empty($this->_oauthToken)) {
-            throw new OAuthException('401 Unauthorized');
+            throw new OAuthException();
         }
 
         // Check to see if the supplied membershipType is a number. If not, convert it to the label
@@ -521,7 +539,7 @@ class Client
     public function clanApproveMember(int $clanID, $membershipType, $membershipID)
     {
         if (empty($this->_oauthToken)) {
-            throw new OAuthException('401 Unauthorized');
+            throw new OAuthException();
         }
 
         // Check to see if the supplied membershipType is a number. If not, convert it to the label
@@ -545,8 +563,6 @@ class Client
             throw new ClientException($response['Message'], $response['ErrorCode'], $response['ThrottleSeconds'],
                 $response['ErrorStatus']);
         }
-
-        return false;
     }
 
     /**
@@ -555,6 +571,7 @@ class Client
      * @param int|string $membershipID
      * @param string $displayName
      * @return bool
+     *
      * @throws ApiKeyException
      * @throws ClientException
      * @throws OAuthException
@@ -566,7 +583,7 @@ class Client
     {
 
         if (empty($this->_oauthToken)) {
-            throw new OAuthException('401 Unauthorized');
+            throw new OAuthException();
         }
 
         // Check to see if the supplied membershipType is a number. If not, convert it to the label
@@ -591,23 +608,110 @@ class Client
             throw new ClientException($response['Message'], $response['ErrorCode'], $response['ThrottleSeconds'],
                 $response['ErrorStatus']);
         }
+    }
 
-        return false;
+    /**
+     * @param int $clanID
+     * @param int|string $membershipType
+     * @param int|string $membershipID
+     * @return bool
+     *
+     * @throws ApiKeyException
+     * @throws ClientException
+     * @throws OAuthException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     *
+     * Requires an OAuth token
+     *
+     * @link https://bungie-net.github.io/multi/operation_post_GroupV2-IndividualGroupInvite.html#operation_post_GroupV2-IndividualGroupInvite
+     */
+    public function clanInviteMember(int $clanID, $membershipType, $membershipID)
+    {
+        if (empty($this->_oauthToken)) {
+            throw new OAuthException();
+        }
+
+        // Check to see if the supplied membershipType is a number. If not, convert it to the label
+        if (is_int($membershipType)) {
+            $membershipType = BungieMembershipType::getLabel($membershipType);
+        }
+        if ($membershipType == "None" || $membershipType == "") {
+            throw new ClientException('An invalid MembershipType was supplied.');
+        }
+
+        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'Members', 'IndividualInvite', $membershipType, $membershipID]), 'POST',
+            ['json' =>
+                [
+                    'message' => ''
+                ]
+            ]);
+
+        if ($response['ErrorStatus'] == "Success") {
+            return true;
+        } else {
+            throw new ClientException($response['Message'], $response['ErrorCode'], $response['ThrottleSeconds'],
+                $response['ErrorStatus']);
+        }
+    }
+
+    /**
+     * @param int $clanID
+     * @param int|string $membershipType
+     * @param int|string $membershipID
+     * @return bool
+     *
+     * @throws ApiKeyException
+     * @throws ClientException
+     * @throws OAuthException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     *
+     * Requires an OAuth token
+     *
+     * @link https://bungie-net.github.io/multi/operation_post_GroupV2-IndividualGroupInviteCancel.html#operation_post_GroupV2-IndividualGroupInviteCancel
+     */
+    public function clanInviteMemberCancel(int $clanID, $membershipType, $membershipID)
+    {
+        if (empty($this->_oauthToken)) {
+            throw new OAuthException();
+        }
+
+        // Check to see if the supplied membershipType is a number. If not, convert it to the label
+        if (is_int($membershipType)) {
+            $membershipType = BungieMembershipType::getLabel($membershipType);
+        }
+        if ($membershipType == "None" || $membershipType == "") {
+            throw new ClientException('An invalid MembershipType was supplied.');
+        }
+
+        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'Members', 'IndividualInviteCancel', $membershipType, $membershipID]), 'POST');
+
+        if ($response['ErrorStatus'] == "Success") {
+            if ($response['Response']['resolution'] == 3) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            throw new ClientException($response['Message'], $response['ErrorCode'], $response['ThrottleSeconds'],
+                $response['ErrorStatus']);
+        }
     }
 
     /**
      * @return GeneralUser
      *
      * @throws ApiKeyException
+     * @throws AuthException
      * @throws ClientException
      * @throws OAuthException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * Requires an OAuth token
      */
     public function getCurrentBungieUser()
     {
         if (empty($this->_oauthToken)) {
-            throw new OAuthException('401 Unauthorized');
+            throw new OAuthException();
         }
         $response = $this->request($this->_buildRequestString('User', ['GetCurrentBungieNetUser']));
 
@@ -617,13 +721,15 @@ class Client
     /**
      * @param int|string $membershipType
      * @param int $membershipID
-     * @param string[]|int[] $components
+     * @param string[]|int[] ...$components
      *
      * @return mixed
      *
      * @throws ApiKeyException
+     * @throws AuthException
      * @throws ClientException
      * @throws OAuthException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getProfile($membershipType, $membershipID, ...$components)
     {
@@ -661,6 +767,12 @@ class Client
      * Gets the absolute path on https://www.bungie.net to the mobileWorldContentPath for the given locale (defaults to en)
      * @param string $locale Defaults to en.
      * @return string
+     *
+     * @throws ApiKeyException
+     * @throws AuthException
+     * @throws ClientException
+     * @throws OAuthException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getMobileWorldContentsPath($locale = "en")
     {
@@ -674,8 +786,10 @@ class Client
      * @return GeneralUser
      *
      * @throws ApiKeyException
+     * @throws AuthException
      * @throws ClientException
      * @throws OAuthException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * @link https://bungie-net.github.io/multi/operation_get_User-GetBungieNetUserById.html#operation_get_User-GetBungieNetUserById
      */
@@ -690,13 +804,15 @@ class Client
      * @return array
      *
      * @throws ApiKeyException
+     * @throws AuthException
      * @throws ClientException
      * @throws OAuthException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getMembershipDataForCurrentUser()
     {
         if (empty($this->_oauthToken)) {
-            throw new OAuthException('401 Unauthorized');
+            throw new OAuthException();
         }
         $response = $this->request($this->_buildRequestString('User', ['GetMembershipsForCurrentUser']));
 
@@ -712,8 +828,10 @@ class Client
      * @return mixed
      *
      * @throws ApiKeyException
+     * @throws AuthException
      * @throws ClientException
      * @throws OAuthException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getBungieAccount($membershipType, $membershipID)
     {
@@ -729,8 +847,10 @@ class Client
      * @return mixed
      *
      * @throws ApiKeyException
+     * @throws AuthException
      * @throws ClientException
      * @throws OAuthException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getGroupV2User($membershipType, $membershipID)
     {
@@ -750,8 +870,10 @@ class Client
      * @return DestinyVendorResponse
      *
      * @throws ApiKeyException
+     * @throws AuthException
      * @throws ClientException
      * @throws OAuthException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * Requires an OAuth token
      *
@@ -764,7 +886,7 @@ class Client
     public function getVendor($membershipType, string $membershipID, string $characterID, ?string $vendor = null, ...$components)
     {
         if (empty($this->_oauthToken)) {
-            throw new OAuthException('401 Unauthorized');
+            throw new OAuthException();
         }
 
         // Check to see if the supplied membershipType is a number. If not, convert it to the label
@@ -845,8 +967,10 @@ class Client
      * @return PublicPartnershipDetail
      *
      * @throws ApiKeyException
+     * @throws AuthException
      * @throws ClientException
      * @throws OAuthException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * @link https://bungie-net.github.io/multi/operation_get_User-GetPartnerships.html#operation_get_User-GetPartnerships
      */
