@@ -226,7 +226,7 @@ class Client
 
         $response = $this->internalRequest($url, $method, $extraParameters);
 
-        $body = self::convertResponseToArray($response);
+        $body = $this->convertResponseToArray($response);
 
         switch ($body['ErrorCode']) {
             case 1:
@@ -318,9 +318,9 @@ class Client
      * @param Response $response
      * @return mixed
      */
-    public static function convertResponseToArray(Response $response)
+    public function convertResponseToArray(Response $response)
     {
-        return json_decode(self::getResponseBody($response), true);
+        return json_decode($this->getResponseBody($response), true);
     }
 
     /**
@@ -329,7 +329,7 @@ class Client
      * @param Response $response
      * @return bool|string
      */
-    public static function getResponseBody(Response $response)
+    public function getResponseBody(Response $response)
     {
         return $response->getBody()->getContents();
     }
