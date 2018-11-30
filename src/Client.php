@@ -22,6 +22,7 @@ use Destiny\Objects\DestinyProfileResponse;
 use Destiny\Objects\DestinyVendorResponse;
 use Destiny\Objects\GeneralUser;
 use Destiny\Objects\GroupMember;
+use Destiny\Objects\GroupMemberApplication;
 use Destiny\Objects\GroupResponse;
 use Destiny\Objects\PublicPartnershipDetail;
 use Destiny\Objects\UserMembership;
@@ -419,6 +420,10 @@ class Client
      * @param $clanID
      * @param int $currentPage
      * @return GroupMember[]
+     * @throws ApiKeyException
+     * @throws ClientException
+     * @throws OAuthException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * Requires an OAuth token
      *
@@ -441,7 +446,11 @@ class Client
     /**
      * @param $clanID
      * @param int $currentPage
-     * @return GroupMember[]
+     * @return GroupMemberApplication[]
+     * @throws ApiKeyException
+     * @throws ClientException
+     * @throws OAuthException
+     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * Requires an OAuth token
      *
@@ -457,7 +466,7 @@ class Client
             ['currentPage' => $currentPage]));
 
         return array_map(function ($item) {
-            return GroupMember::makeFromArray($item);
+            return GroupMemberApplication::makeFromArray($item);
         }, $response['Response']['results']);
     }
 

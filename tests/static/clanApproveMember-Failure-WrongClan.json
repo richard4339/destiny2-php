@@ -1,0 +1,8 @@
+{
+  "Response": false,
+  "ErrorCode": 606,
+  "ThrottleSeconds": 0,
+  "ErrorStatus": "GroupMembershipPendingApplicationNotFound",
+  "Message": "The specified user was not found in your group or clan's pending member list. Please reload your view before trying again.",
+  "MessageData": {}
+}

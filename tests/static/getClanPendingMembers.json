@@ -1,0 +1,36 @@
+{
+  "Response": {
+    "results": [
+      {
+        "groupId": "2424208",
+        "creationDate": "2018-11-30T04:06:40Z",
+        "resolveState": 0,
+        "destinyUserInfo": {
+          "iconPath": "",
+          "membershipType": 4,
+          "membershipId": "4611686018485611597",
+          "displayName": "DelDemon"
+        },
+        "bungieNetUserInfo": {
+          "supplementalDisplayName": "19616559",
+          "iconPath": "/img/profile/avatars/cc65.jpg",
+          "membershipType": 254,
+          "membershipId": "19616559",
+          "displayName": "DelDemon"
+        }
+      }
+    ],
+    "totalResults": 1,
+    "hasMore": false,
+    "query": {
+      "itemsPerPage": 50,
+      "currentPage": 1
+    },
+    "useTotalResults": true
+  },
+  "ErrorCode": 1,
+  "ThrottleSeconds": 0,
+  "ErrorStatus": "Success",
+  "Message": "Ok",
+  "MessageData": {}
+}

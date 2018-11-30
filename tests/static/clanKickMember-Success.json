@@ -1,0 +1,120 @@
+{
+  "Response": {
+    "group": {
+      "groupId": "2424208",
+      "name": "The Warren BNET",
+      "groupType": 1,
+      "membershipIdCreated": "8628538",
+      "creationDate": "2017-09-11T18:48:09.715Z",
+      "modificationDate": "2018-09-02T00:15:56.354Z",
+      "about": "Do you like dairy and/or steaks? Do you have an epic beard? Do you wear purple sweaters? Do you bring your own feathered lemurs to parties? Do you think PopeBear should eat lots of Taco Bell? If you answered yes or no to any of these, you'll fit right in!\n\nThis clan is exclusively for Battle.Net! If you are on PS4 or X1 please join our sister clan The Warren [WRRN]",
+      "tags": [],
+      "memberCount": 94,
+      "isPublic": true,
+      "isPublicTopicAdminOnly": false,
+      "motto": "Down The Rabbit Hole We Go",
+      "allowChat": true,
+      "isDefaultPostPublic": false,
+      "chatSecurity": 0,
+      "locale": "en",
+      "avatarImageIndex": 0,
+      "homepage": 0,
+      "membershipOption": 0,
+      "defaultPublicity": 2,
+      "theme": "Group_Community1",
+      "bannerPath": "/img/Themes/Group_Community1/struct_images/group_top_banner.jpg",
+      "avatarPath": "/img/profile/avatars/group/defaultGroup.png",
+      "conversationId": "28387443",
+      "enableInvitationMessagingForAdmins": false,
+      "banExpireDate": "2001-01-01T00:00:00Z",
+      "features": {
+        "maximumMembers": 100,
+        "maximumMembershipsOfGroupType": 1,
+        "capabilities": 31,
+        "membershipTypes": [
+          1,
+          2,
+          4,
+          10
+        ],
+        "invitePermissionOverride": true,
+        "updateCulturePermissionOverride": true,
+        "hostGuidedGamePermissionOverride": 1,
+        "updateBannerPermissionOverride": true,
+        "joinLevel": 1
+      },
+      "clanInfo": {
+        "d2ClanProgressions": {
+          "584850370": {
+            "progressionHash": 584850370,
+            "dailyProgress": 100000,
+            "dailyLimit": 0,
+            "weeklyProgress": 100000,
+            "weeklyLimit": 100000,
+            "currentProgress": 100000,
+            "level": 2,
+            "levelCap": 6,
+            "stepIndex": 2,
+            "progressToNextLevel": 0,
+            "nextLevelAt": 125000
+          },
+          "1273404180": {
+            "progressionHash": 1273404180,
+            "dailyProgress": 0,
+            "dailyLimit": 0,
+            "weeklyProgress": 0,
+            "weeklyLimit": 0,
+            "currentProgress": 0,
+            "level": 1,
+            "levelCap": 6,
+            "stepIndex": 1,
+            "progressToNextLevel": 0,
+            "nextLevelAt": 1
+          },
+          "3759191272": {
+            "progressionHash": 3759191272,
+            "dailyProgress": 0,
+            "dailyLimit": 0,
+            "weeklyProgress": 0,
+            "weeklyLimit": 0,
+            "currentProgress": 0,
+            "level": 1,
+            "levelCap": 6,
+            "stepIndex": 1,
+            "progressToNextLevel": 0,
+            "nextLevelAt": 1
+          },
+          "3381682691": {
+            "progressionHash": 3381682691,
+            "dailyProgress": 0,
+            "dailyLimit": 0,
+            "weeklyProgress": 0,
+            "weeklyLimit": 0,
+            "currentProgress": 0,
+            "level": 1,
+            "levelCap": 6,
+            "stepIndex": 1,
+            "progressToNextLevel": 0,
+            "nextLevelAt": 1
+          }
+        },
+        "clanCallsign": "WRNB",
+        "clanBannerData": {
+          "decalId": 4125445803,
+          "decalColorId": 3396165378,
+          "decalBackgroundColorId": 3551971190,
+          "gonfalonId": 1473910866,
+          "gonfalonColorId": 2157636323,
+          "gonfalonDetailId": 1698031303,
+          "gonfalonDetailColorId": 4128900503
+        }
+      }
+    },
+    "groupDeleted": false
+  },
+  "ErrorCode": 1,
+  "ThrottleSeconds": 0,
+  "ErrorStatus": "Success",
+  "Message": "Ok",
+  "MessageData": {}
+}

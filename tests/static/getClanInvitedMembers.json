@@ -1,0 +1,36 @@
+{
+  "Response": {
+    "results": [
+      {
+        "groupId": "2424208",
+        "creationDate": "2018-11-17T05:25:52Z",
+        "resolveState": 0,
+        "destinyUserInfo": {
+          "iconPath": "",
+          "membershipType": 4,
+          "membershipId": "4611686018467267879",
+          "displayName": "Phobus"
+        },
+        "bungieNetUserInfo": {
+          "supplementalDisplayName": "4029048",
+          "iconPath": "/img/profile/avatars/cc22.jpg",
+          "membershipType": 254,
+          "membershipId": "4029048",
+          "displayName": "Phobus"
+        }
+      }
+    ],
+    "totalResults": 1,
+    "hasMore": false,
+    "query": {
+      "itemsPerPage": 50,
+      "currentPage": 1
+    },
+    "useTotalResults": true
+  },
+  "ErrorCode": 1,
+  "ThrottleSeconds": 0,
+  "ErrorStatus": "Success",
+  "Message": "Ok",
+  "MessageData": {}
+}
