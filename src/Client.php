@@ -29,6 +29,7 @@ use Destiny\Objects\Vendor;
 use Destiny\Objects\VendorSale;
 use GuzzleHttp\Exception\ClientException as GuzzleClientException;
 use GuzzleHttp\Client as GuzzleClient;
+use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
@@ -193,6 +194,37 @@ class Client
     protected function request($url, string $method = 'GET', array $extraParameters = null)
     {
 
+        $response = $this->internalRequest($url, $method, $extraParameters);
+
+        $body = ResponseMediator::convertResponseToArray($response);
+
+        switch ($body['ErrorCode']) {
+            case 1:
+                return $body;
+                break;
+            case 2101:
+                throw new ApiKeyException($body['Message'], $body['ErrorCode'], $body['ThrottleSeconds'],
+                    $body['ErrorStatus']);
+                break;
+            default:
+                throw new ClientException($body['Message'], $body['ErrorCode'], $body['ThrottleSeconds'],
+                    $body['ErrorStatus']);
+                break;
+        }
+    }
+
+    /**
+     * @param $url
+     * @param string $method
+     * @param array|null $extraParameters
+     * @return mixed|\Psr\Http\Message\ResponseInterface
+     * @throws ApiKeyException
+     * @throws OAuthException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    protected function internalRequest($url, string $method = 'GET', array $extraParameters = null)
+    {
+
         if (empty($this->_apiKey)) {
             throw new ApiKeyException("API Key is not set");
         }
@@ -229,24 +261,13 @@ class Client
                 case 401:
                     throw new OAuthException('401 Unauthorized');
                     break;
+                default:
+                    throw $x;
+                    break;
             }
         }
 
-        $body = ResponseMediator::convertResponseToArray($response);
-
-        switch ($body['ErrorCode']) {
-            case 1:
-                return $body;
-                break;
-            case 2101:
-                throw new ApiKeyException($body['Message'], $body['ErrorCode'], $body['ThrottleSeconds'],
-                    $body['ErrorStatus']);
-                break;
-            default:
-                throw new ClientException($body['Message'], $body['ErrorCode'], $body['ThrottleSeconds'],
-                    $body['ErrorStatus']);
-                break;
-        }
+        return $response;
     }
 
     /**
@@ -514,7 +535,7 @@ class Client
                 ]
             ]);
 
-        if($response['Response'] === true) {
+        if ($response['Response'] === true) {
             return true;
         } else {
             throw new ClientException($response['Message'], $response['ErrorCode'], $response['ThrottleSeconds'],
@@ -537,7 +558,8 @@ class Client
      *
      * @todo The return is currently broken
      */
-    public function clanDenyMember(int $clanID, $membershipType, $membershipID, string $displayName) {
+    public function clanDenyMember(int $clanID, $membershipType, $membershipID, string $displayName)
+    {
 
         if (empty($this->_oauthToken)) {
             throw new OAuthException('401 Unauthorized');
@@ -559,7 +581,7 @@ class Client
                 ]
             ]);
 
-        if($response['Response'] === true) {
+        if ($response['Response'] === true) {
             return true;
         } else {
             throw new ClientException($response['Message'], $response['ErrorCode'], $response['ThrottleSeconds'],
