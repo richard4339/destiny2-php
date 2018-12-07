@@ -26,7 +26,7 @@ class OAuthException extends Exception
      * @param string $status
      * @param Throwable|null $previous
      */
-    public function __construct(string $message = "401 Unauthorized", int $code = 0, int $seconds = 0, string $status = '', ?Throwable $previous = null)
+    public function __construct(string $message = "No OAuth access token provided to method that requires authentication.", int $code = 0, int $seconds = 0, string $status = '', ?Throwable $previous = null)
     {
         parent::__construct($message, $code, $seconds, $status, $previous);
     }
