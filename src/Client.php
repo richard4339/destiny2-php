@@ -22,6 +22,7 @@ use Destiny\Objects\DestinyProfileComponent;
 use Destiny\Objects\DestinyProfileResponse;
 use Destiny\Objects\DestinyVendorResponse;
 use Destiny\Objects\GeneralUser;
+use Destiny\Objects\GlobalAlert;
 use Destiny\Objects\GroupMember;
 use Destiny\Objects\GroupMemberApplication;
 use Destiny\Objects\GroupResponse;
@@ -355,8 +356,47 @@ class Client
         if (!empty($queryParams)) {
             $query = http_build_query($queryParams);
         }
-        $url = sprintf("%s/%s/%s/?%s", self::URI, $endpoint, implode("/", $uriParams), $query);
+        $url = '';
+        if (!empty($uriParams)) {
+            $url = sprintf("%s/%s/%s/?%s", self::URI, $endpoint, implode("/", $uriParams), $query);
+        } else {
+            $url = sprintf("%s/%s/?%s", self::URI, $endpoint, $query);
+        }
+        $url = rtrim($url, '?/');
         return $url;
+    }
+
+    /**
+     * Gets any active global alert for display in the forum banners, help pages, etc. Usually used for DOC alerts.
+     *
+     * @param bool $includeStreaming Determines whether Streaming Alerts are included in results
+     * @return GlobalAlert[]|null
+     *
+     * @throws ApiKeyException
+     * @throws AuthException
+     * @throws ClientException
+     * @throws OAuthException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     *
+     * @link https://bungie-net.github.io/multi/operation_get_-GetGlobalAlerts.html#operation_get_-GetGlobalAlerts
+     *
+     * @todo Needs to support includeStreaming, currently ignores the parameter. We need valid output for when includestreaming returns something to write this properly. Also _buildRequestString converts the true/false to integers which Bungie will not accept.
+     */
+    public function getGlobalAlerts(bool $includeStreaming = false)
+    {
+
+        $includeStreaming = false;
+
+        $queryParms = [];
+        if ($includeStreaming) {
+            $queryParms['includestreaming'] = $includeStreaming;
+        }
+        $response = $this->request($this->_buildRequestString('GlobalAlerts', [],
+            $queryParms));
+
+        return array_map(function ($item) {
+            return GlobalAlert::makeFromArray($item);
+        }, $response['Response']);
     }
 
     /**

@@ -1,0 +1,17 @@
+{
+  "Response": [
+    {
+      "AlertKey": "D2-OfflineSoonToday",
+      "AlertHtml": "Destiny 2 will be temporarily offline today for scheduled maintenance. Please stay tuned to @BungieHelp for updates.",
+      "AlertTimestamp": "2018-12-04T13:48:36Z",
+      "AlertLink": "https://www.bungie.net/en/Help/Article/13125",
+      "AlertLevel": 3,
+      "AlertType": 0
+    }
+  ],
+  "ErrorCode": 1,
+  "ThrottleSeconds": 0,
+  "ErrorStatus": "Success",
+  "Message": "Ok",
+  "MessageData": {}
+}
