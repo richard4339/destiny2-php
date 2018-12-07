@@ -17,9 +17,9 @@ use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Client as GuzzleClient;
 
 /**
- * Class GroupTest
+ * Class GroupOauthTest
  */
-class GroupTest extends ClientOauthTestCase
+class GroupOauthTest extends ClientOauthTestCase
 {
 
     const TEST_CLANID = "2114315";
