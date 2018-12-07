@@ -45,6 +45,34 @@ use GuzzleHttp\HandlerStack;
  * not require it, that is fine. However, if you pass an invalid OAuth token to ANY function regardless of its
  * requirements you will get an OAuthException
  *
+ * GroupV2 Missing Methods
+ * GET: GroupV2.GetAvailableAvatars
+ * GET: GroupV2.GetAvailableThemes
+ * GET: GroupV2.GetUserClanInviteSetting
+ * POST: GroupV2.SetUserClanInviteSetting
+ * POST: GroupV2.GetRecommendedGroups
+ * POST: GroupV2.GroupSearch
+ * POST: GroupV2.GetGroupByNameV2
+ * GET: GroupV2.GetGroupOptionalConversations
+ * POST: GroupV2.CreateGroup
+ * POST: GroupV2.EditGroup
+ * POST: GroupV2.EditClanBanner
+ * POST: GroupV2.EditFounderOptions
+ * POST: GroupV2.AddOptionalConversation
+ * POST: GroupV2.EditOptionalConversation
+ * POST: GroupV2.EditGroupMembership
+ * POST: GroupV2.BanMember
+ * POST: GroupV2.UnbanMember
+ * POST: GroupV2.AbdicateFoundership
+ * POST: GroupV2.RequestGroupMembership
+ * POST: GroupV2.RescindGroupMembership
+ * POST: GroupV2.ApproveAllPending
+ * POST: GroupV2.DenyAllPending
+ * POST: GroupV2.ApprovePendingForList
+ * POST: GroupV2.DenyPendingForList Note: This is implemented but only accepts one member at a time
+ * GET: GroupV2.GetGroupsForMember
+ * GET: GroupV2.GetPotentialGroupsForMember
+ *
  */
 class Client
 {
@@ -119,8 +147,17 @@ class Client
      * @param null|string $clientSecret
      * @throws ApiKeyException
      */
-    function __construct(string $apiKey = '', ?string $token = null, ?string $clientID = null, ?string $clientSecret = null, ?string $appName = '', ?string $appVersion = '', ?string $appIDNumber = '', ?string $appURL = '', ?string $appEmail = '')
-    {
+    function __construct(
+        string $apiKey = '',
+        ?string $token = null,
+        ?string $clientID = null,
+        ?string $clientSecret = null,
+        ?string $appName = '',
+        ?string $appVersion = '',
+        ?string $appIDNumber = '',
+        ?string $appURL = '',
+        ?string $appEmail = ''
+    ) {
         if (empty($apiKey)) {
             $apiKey = $_ENV["APIKEY"];
         }
@@ -274,7 +311,8 @@ class Client
             $method = 'GET';
         }
 
-        $userAgent = sprintf('%s/%s AppId/%s (+%s;%s)', $this->_appName ?? '', $this->_appVersion ?? '', $this->_appIDNumber ?? '', $this->_appURL ?? '', $this->_appEmail ?? '');
+        $userAgent = sprintf('%s/%s AppId/%s (+%s;%s)', $this->_appName ?? '', $this->_appVersion ?? '',
+            $this->_appIDNumber ?? '', $this->_appURL ?? '', $this->_appEmail ?? '');
 
         $headers = [
             'User-Agent' => $userAgent,
@@ -556,7 +594,8 @@ class Client
             throw new ClientException('An invalid MembershipType was supplied.');
         }
 
-        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'Members', $membershipType, $membershipID, 'Kick']), 'POST');
+        $response = $this->request($this->_buildRequestString('GroupV2',
+            [$clanID, 'Members', $membershipType, $membershipID, 'Kick']), 'POST');
 
         return $response;
     }
@@ -590,11 +629,13 @@ class Client
             throw new ClientException('An invalid MembershipType was supplied.');
         }
 
-        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'Members', 'Approve', $membershipType, $membershipID]), 'POST',
-            ['json' =>
-                [
-                    'message' => ''
-                ]
+        $response = $this->request($this->_buildRequestString('GroupV2',
+            [$clanID, 'Members', 'Approve', $membershipType, $membershipID]), 'POST',
+            [
+                'json' =>
+                    [
+                        'message' => ''
+                    ]
             ]);
 
         if ($response['Response'] === true) {
@@ -635,11 +676,12 @@ class Client
 
         ///GroupV2/{groupId}/Members/DenyList/
         $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'Members', 'DenyList']), 'POST',
-            ['json' =>
-                [
-                    'memberships' => [json_decode(json_encode($member))],
-                    'message' => ''
-                ]
+            [
+                'json' =>
+                    [
+                        'memberships' => [json_decode(json_encode($member))],
+                        'message' => ''
+                    ]
             ]);
 
         if ($response['Response'] === true) {
@@ -679,11 +721,13 @@ class Client
             throw new ClientException('An invalid MembershipType was supplied.');
         }
 
-        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'Members', 'IndividualInvite', $membershipType, $membershipID]), 'POST',
-            ['json' =>
-                [
-                    'message' => ''
-                ]
+        $response = $this->request($this->_buildRequestString('GroupV2',
+            [$clanID, 'Members', 'IndividualInvite', $membershipType, $membershipID]), 'POST',
+            [
+                'json' =>
+                    [
+                        'message' => ''
+                    ]
             ]);
 
         if ($response['ErrorStatus'] == "Success") {
@@ -723,7 +767,8 @@ class Client
             throw new ClientException('An invalid MembershipType was supplied.');
         }
 
-        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'Members', 'IndividualInviteCancel', $membershipType, $membershipID]), 'POST');
+        $response = $this->request($this->_buildRequestString('GroupV2',
+            [$clanID, 'Members', 'IndividualInviteCancel', $membershipType, $membershipID]), 'POST');
 
         if ($response['ErrorStatus'] == "Success") {
             if ($response['Response']['resolution'] == 3) {
@@ -790,7 +835,8 @@ class Client
             }
         }
 
-        $response = $this->request($this->_buildRequestString('Destiny2', [$membershipType, 'Profile', $membershipID], ['components' => implode(',', $params)]));
+        $response = $this->request($this->_buildRequestString('Destiny2', [$membershipType, 'Profile', $membershipID],
+            ['components' => implode(',', $params)]));
 
         $profileResponse = new DestinyProfileResponse();
         $profileResponse->profile = DestinyProfileComponent::makeFromArray($response['Response']['profile']);
@@ -875,7 +921,8 @@ class Client
      */
     public function getBungieAccount($membershipType, $membershipID)
     {
-        $response = $this->request($this->_buildRequestString('User', ['GetBungieAccount', $membershipID, $membershipType]));
+        $response = $this->request($this->_buildRequestString('User',
+            ['GetBungieAccount', $membershipID, $membershipType]));
 
         return $response;
 
@@ -894,7 +941,8 @@ class Client
      */
     public function getGroupV2User($membershipType, $membershipID)
     {
-        $response = $this->request($this->_buildRequestString('GroupV2', ['User', $membershipType, $membershipID, 0, 1]));
+        $response = $this->request($this->_buildRequestString('GroupV2',
+            ['User', $membershipType, $membershipID, 0, 1]));
 
         return $response['Response']['results'];
 
@@ -923,8 +971,13 @@ class Client
      *
      * @example To get Xur (this is the actual hash for Xur): $client->getVendor(BungieMembershipType::TIGERPSN, '12345', '67890', '2190858386', DestinyComponentType::VENDORS);
      */
-    public function getVendor($membershipType, string $membershipID, string $characterID, ?string $vendor = null, ...$components)
-    {
+    public function getVendor(
+        $membershipType,
+        string $membershipID,
+        string $characterID,
+        ?string $vendor = null,
+        ...$components
+    ) {
         if (empty($this->_oauthToken)) {
             throw new OAuthException();
         }
@@ -959,7 +1012,8 @@ class Client
         if (!empty($vendor)) {
             $uriParams[] = $vendor;
         }
-        $response = $this->request($this->_buildRequestString('Destiny2', $uriParams, ['components' => implode(',', $params)]));
+        $response = $this->request($this->_buildRequestString('Destiny2', $uriParams,
+            ['components' => implode(',', $params)]));
 
         $profileResponse = new DestinyVendorResponse();
         if (isset($response['Response']['vendor']['data'])) {

@@ -133,11 +133,11 @@ class GroupOauthTest extends ClientOauthTestCase
     }
 
     /**
-     * @todo This test is currently designed to fail since the method does not properly return a value
+     * @todo This test is not based on a real world result but on what the API documentation says
      */
     public function testClanApproveMemberSuccess()
     {
-        $this->client->setMock(__DIR__ . '/static/clanKickMember-Success.json');
+        $this->client->setMock(__DIR__ . '/static/clanApproveMember.json');
 
         $results = $this->client->clanApproveMember(self::TEST_CLANID, BungieMembershipType::TIGERPSN, '12345');
         $this->assertEquals(true, $results);
