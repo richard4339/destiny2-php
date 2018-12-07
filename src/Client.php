@@ -650,6 +650,52 @@ class Client
      * @param int $clanID
      * @param int|string $membershipType
      * @param int|string $membershipID
+     * @param string $displayName
+     * @return bool
+     *
+     * @throws ApiKeyException
+     * @throws ClientException
+     * @throws OAuthException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     *
+     * @todo The return is currently broken
+     */
+    public function clanDenyMember(int $clanID, $membershipType, $membershipID, string $displayName)
+    {
+
+        if (empty($this->_oauthToken)) {
+            throw new OAuthException();
+        }
+
+        // Check to see if the supplied membershipType is a number. If not, convert it to the label
+        if (is_int($membershipType)) {
+            $membershipType = BungieMembershipType::getLabel($membershipType);
+        }
+
+        $member = new UserMembership($membershipType, $membershipID, $displayName);
+
+        ///GroupV2/{groupId}/Members/DenyList/
+        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'Members', 'DenyList']), 'POST',
+            [
+                'json' =>
+                    [
+                        'memberships' => [json_decode(json_encode($member))],
+                        'message' => ''
+                    ]
+            ]);
+
+        if ($response['Response'] === true) {
+            return true;
+        } else {
+            throw new ClientException($response['Message'], $response['ErrorCode'], $response['ThrottleSeconds'],
+                $response['ErrorStatus']);
+        }
+    }
+
+    /**
+     * @param int $clanID
+     * @param int|string $membershipType
+     * @param int|string $membershipID
      * @return bool
      *
      * @throws ApiKeyException
