@@ -23,12 +23,34 @@ class GroupTest extends ClientTestCase
      */
     public function testGetGroupByID()
     {
-
         $this->client->setMock(__DIR__ . '/static/getClan.json');
 
-        $user = $this->client->getGroup(self::TEST_CLANID);
+        $response = $this->client->getGroup(self::TEST_CLANID);
 
-        $this->assertEquals('The Warren', $user->detail()->name());
+        $this->assertEquals('The Warren', $response->detail()->name());
+        $this->assertEquals(2114315, $response->detail()->groupId());
+        $this->assertEquals(1, $response->detail()->groupType());
+        $this->assertEquals(8628538, $response->detail()->membershipIdCreated());
+        $this->assertEquals(new \DateTime("2017-08-29T20:31:20.451Z"), $response->detail()->creationDate());
+        $this->assertEquals(new \DateTime("2017-11-02T03:13:13.188Z"), $response->detail()->modificationDate());
+        $this->assertEquals("Do you have an epic beard(like BriarRabbit)? Do you wear purple sweaters? Do you bring your own feathered lemurs to parties? Do you think PopeBear should eat lots of Taco Bell? If you answered yes or no to any of these, you'll fit right in!\n\nThis clan is exclusively for PS4 players! XBox members please visit our sister clan The Warren XBox [WRNX], or if you are on Battle.Net please join our sister clan The Warren BNET [WRNB]", $response->detail()->about());
+        $this->assertEquals(true, $response->detail()->isPublic());
+        $this->assertEquals(false, $response->detail()->isPublicTopicAdminOnly());
+        $this->assertEquals("Down the rabbit hole we go!", $response->detail()->motto());
+        $this->assertEquals(true, $response->detail()->allowChat());
+        $this->assertEquals(false, $response->detail()->isDefaultPostPublic());
+        $this->assertEquals(0, $response->detail()->chatSecurity());
+        $this->assertEquals("en", $response->detail()->locale());
+        $this->assertEquals(0, $response->detail()->avatarImageIndex());
+        $this->assertEquals(0, $response->detail()->homepage());
+        $this->assertEquals(0, $response->detail()->membershipOption());
+        $this->assertEquals(2, $response->detail()->defaultPublicity());
+        $this->assertEquals("Group_Community1", $response->detail()->theme());
+        $this->assertEquals("/img/Themes/Group_Community1/struct_images/group_top_banner.jpg", $response->detail()->bannerPath());
+        $this->assertEquals("/img/profile/avatars/group/defaultGroup.png", $response->detail()->avatarPath());
+        $this->assertEquals("27193710", $response->detail()->conversationId());
+        $this->assertEquals(false, $response->detail()->enableInvitationMessagingForAdmins());
+        $this->assertEquals(new \DateTime("2001-01-01T00:00:00Z"), $response->detail()->banExpireDate());
     }
 
     /**
@@ -127,6 +149,7 @@ class GroupTest extends ClientTestCase
         $results = $this->client->clanKickMember(self::TEST_CLANID, BungieMembershipType::TIGERBLIZZARD, '12345');
     }
 
+
     /**
      * @expectedException \Destiny\Exceptions\OAuthException
      */
@@ -135,7 +158,32 @@ class GroupTest extends ClientTestCase
         $this->client->setMock(__DIR__ . '/static/clanApproveMember.json');
 
         $results = $this->client->clanApproveMember(self::TEST_CLANID, BungieMembershipType::TIGERPSN, '12345');
-        $this->assertEquals(true, $results);
+        $this->assertEquals(true, $results->success());
+        $this->assertEquals(true, $results->response());
+        $this->assertEquals(PlatformErrorCodes::SUCCESS, $results->errorCode());
+        $this->assertEquals('Success', $results->errorStatus());
+        $this->assertEquals("Ok", $results->message());
+        $this->assertEquals(self::TEST_CLANID, $results->clanID());
+        $this->assertEquals('12345', $results->membershipID());
+        $this->assertEquals(BungieMembershipType::getLabel(BungieMembershipType::TIGERPSN), $results->membershipType());
+    }
+
+    /**
+     * @expectedException \Destiny\Exceptions\OAuthException
+     */
+    public function testClanApproveMemberSuccessInAnotherClan()
+    {
+        $this->client->setMock(__DIR__ . '/static/clanApproveMember-Failure-InAnotherClan.json');
+
+        $results = $this->client->clanApproveMember(self::TEST_CLANID, BungieMembershipType::TIGERPSN, '12345');
+        $this->assertEquals(true, $results->success());
+        $this->assertEquals(false, $results->response());
+        $this->assertEquals(699, $results->errorCode());
+        $this->assertEquals('ClanApplicantInClanSoNowInvited', $results->errorStatus());
+        $this->assertEquals("The clan applicant is already a member of a different clan.  Their application to this clan has been converted to a pending invitation, they must accept the invitation before the user will be a member of your clan.", $results->message());
+        $this->assertEquals(self::TEST_CLANID, $results->clanID());
+        $this->assertEquals('12345', $results->membershipID());
+        $this->assertEquals(BungieMembershipType::getLabel(BungieMembershipType::TIGERPSN), $results->membershipType());
     }
 
     /**
