@@ -214,9 +214,8 @@ abstract class AbstractResource
         if (in_array($name, $this->dates)) {
             return $this->getDateTime($name, $arguments);
         }
-        if ($data = $this->get($name)) {
-            return $data;
-        }
+        // No longer checking to see if this returns false since false is actually a valid return value for a boolean.
+        return $this->get($name);
     }
 
     /**
