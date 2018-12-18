@@ -13,10 +13,12 @@ namespace Destiny;
 use Destiny\Enums\BungieMembershipType;
 use Destiny\Enums\DestinyComponentType;
 use Destiny\Enums\GroupType;
+use Destiny\Enums\PlatformErrorCodes;
 use Destiny\Exceptions\AuthException;
 use Destiny\Exceptions\ClientException;
 use Destiny\Exceptions\ApiKeyException;
 use Destiny\Exceptions\OAuthException;
+use Destiny\Objects\ClanApproveMember;
 use Destiny\Objects\DestinyCharacterComponent;
 use Destiny\Objects\DestinyProfileComponent;
 use Destiny\Objects\DestinyProfileResponse;
@@ -157,7 +159,8 @@ class Client
         ?string $appIDNumber = '',
         ?string $appURL = '',
         ?string $appEmail = ''
-    ) {
+    )
+    {
         if (empty($apiKey)) {
             $apiKey = $_ENV["APIKEY"];
         }
@@ -258,6 +261,7 @@ class Client
      * @param string $url
      * @param string $method
      * @param array|null $extraParameters
+     * @param int[]|null $allowedErrorCodes Some error codes are always a success (1). Some are always a failure (12, 2101). Some, like 699, are technically a success when called from certain endpoints.
      * @return mixed
      * @throws ApiKeyException
      * @throws ClientException
@@ -265,25 +269,30 @@ class Client
      * @throws AuthException
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    protected function request($url, string $method = 'GET', array $extraParameters = null)
+    protected function request($url, string $method = 'GET', array $extraParameters = null, array $allowedErrorCodes = null)
     {
         $response = $this->internalRequest($url, $method, $extraParameters);
 
         $body = $this->convertResponseToArray($response);
 
         switch ($body['ErrorCode']) {
-            case 1:
+            case 1: // Success
                 return $body;
                 break;
-            case 12:
+            case 12: // INSUFFICIENTPRIVILEGES
                 throw new AuthException($body['Message'], $body['ErrorCode'], $body['ThrottleSeconds'],
                     $body['ErrorStatus']);
                 break;
-            case 2101:
+            case 2101: // APIINVALIDOREXPIREDKEY
                 throw new ApiKeyException($body['Message'], $body['ErrorCode'], $body['ThrottleSeconds'],
                     $body['ErrorStatus']);
                 break;
             default:
+                if (!empty($allowedErrorCodes)) {
+                    if (in_array($body['ErrorCode'], $allowedErrorCodes)) {
+                        return $body;
+                    }
+                }
                 throw new ClientException($body['Message'], $body['ErrorCode'], $body['ThrottleSeconds'],
                     $body['ErrorStatus']);
                 break;
@@ -604,7 +613,7 @@ class Client
      * @param int $clanID
      * @param int|string $membershipType
      * @param int|string $membershipID
-     * @return bool
+     * @return ClanApproveMember|null
      *
      * @throws ApiKeyException
      * @throws ClientException
@@ -636,9 +645,50 @@ class Client
                     [
                         'message' => ''
                     ]
+            ], [PlatformErrorCodes::CLANAPPLICANTINCLANSONOWINVITED]);
+
+        return new ClanApproveMember($clanID, $membershipType, $membershipID, $response['Response'], $response['ErrorCode'], $response['ErrorStatus'], $response['Message']);
+    }
+
+    /**
+     * @param int $clanID
+     * @param int|string $membershipType
+     * @param int|string $membershipID
+     * @param string $displayName
+     * @return bool
+     *
+     * @throws ApiKeyException
+     * @throws ClientException
+     * @throws OAuthException
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     *
+     * @todo The return is currently broken. I believe it should simply be if ErrorCode == 1 then return true
+     */
+    public function clanDenyMember(int $clanID, $membershipType, $membershipID, string $displayName)
+    {
+
+        if (empty($this->_oauthToken)) {
+            throw new OAuthException();
+        }
+
+        // Check to see if the supplied membershipType is a number. If not, convert it to the label
+        if (is_int($membershipType)) {
+            $membershipType = BungieMembershipType::getLabel($membershipType);
+        }
+
+        $member = new UserMembership($membershipType, $membershipID, $displayName);
+
+        ///GroupV2/{groupId}/Members/DenyList/
+        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'Members', 'DenyList']), 'POST',
+            [
+                'json' =>
+                    [
+                        'memberships' => [json_decode(json_encode($member))],
+                        'message' => ''
+                    ]
             ]);
 
-        if ($response['Response'] === true) {
+        if ($response['ErrorCode'] == PlatformErrorCodes::SUCCESS) {
             return true;
         } else {
             throw new ClientException($response['Message'], $response['ErrorCode'], $response['ThrottleSeconds'],
@@ -931,7 +981,8 @@ class Client
         string $characterID,
         ?string $vendor = null,
         ...$components
-    ) {
+    )
+    {
         if (empty($this->_oauthToken)) {
             throw new OAuthException();
         }

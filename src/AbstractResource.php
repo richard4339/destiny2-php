@@ -214,9 +214,8 @@ abstract class AbstractResource
         if (in_array($name, $this->dates)) {
             return $this->getDateTime($name, $arguments);
         }
-        if ($data = $this->get($name)) {
-            return $data;
-        }
+        // No longer checking to see if this returns false since false is actually a valid return value for a boolean.
+        return $this->get($name);
     }
 
     /**
@@ -230,32 +229,35 @@ abstract class AbstractResource
      */
     public function getDateTime($key = null, $tz = null)
     {
+        try {
+            $string = $this->get($key);
 
-        $string = $this->get($key);
+            if (empty($string)) {
+                return false;
+            }
 
-        if (empty($string)) {
-            return false;
-        }
-
-        if (is_array($tz)) {
-            if (!empty($tz)) {
-                $tz = $tz[0];
-            } else {
+            if (is_array($tz)) {
+                if (!empty($tz)) {
+                    $tz = $tz[0];
+                } else {
+                    $tz = null;
+                }
+            } elseif (!is_string($tz)) {
                 $tz = null;
             }
-        } elseif (!is_string($tz)) {
-            $tz = null;
+
+            $date = new DateTime($string);
+
+            $timezone = new DateTimeZone($tz ?? $this->timezone);
+
+            if ($date->getTimezone()->getName() != $timezone->getName()) {
+                $date->setTimezone($timezone);
+            }
+
+            return $date;
+        } catch (\Exception $x) {
+            return null;
         }
-
-        $date = new DateTime($string);
-
-        $timezone = new DateTimeZone($tz ?? $this->timezone);
-
-        if ($date->getTimezone()->getName() != $timezone->getName()) {
-            $date->setTimezone($timezone);
-        }
-
-        return $date;
     }
 
     /**

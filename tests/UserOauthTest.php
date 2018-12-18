@@ -10,16 +10,16 @@
 namespace Destiny\Tests;
 
 /**
- * Class UserTest
+ * Class UserOauthTest
  * @package Destiny\Tests
  */
-class UserTest extends ClientTestCase
+class UserOauthTest extends ClientOauthTestCase
 {
 
     const TEST_ID = "2114315";
 
     /**
-     * @expectedException \Destiny\Exceptions\OAuthException
+     * @expectedException \Destiny\Exceptions\ApiKeyException
      */
     public function testInvalidAPIKey()
     {
@@ -29,7 +29,7 @@ class UserTest extends ClientTestCase
     }
 
     /**
-     * @expectedException \Destiny\Exceptions\OAuthException
+     *
      */
     public function testGetCurrentDisplayName() {
 
@@ -41,7 +41,7 @@ class UserTest extends ClientTestCase
     }
 
     /**
-     * @expectedException \Destiny\Exceptions\OAuthException
+     *
      */
     public function testInvalidGetCurrentDisplayName() {
 

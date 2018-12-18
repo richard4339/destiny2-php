@@ -30,7 +30,6 @@ use JsonSerializable;
  * @method int memberCount()
  * @method boolean isPublic()
  * @method boolean isPublicTopicAdminOnly()
- * @method int primaryAlliedGroupId()
  * @method string motto()
  * @method boolean allowChat()
  * @method boolean isDefaultPostPublic()
@@ -43,7 +42,6 @@ use JsonSerializable;
  * @method string theme()
  * @method string bannerPath()
  * @method string avatarPath()
- * @method boolean isAllianceOwner()
  * @method int conversationId()
  * @method boolean enableInvitationMessagingForAdmins()
  * @method \DateTime banExpireDate($tz = null)
@@ -52,6 +50,24 @@ use JsonSerializable;
  */
 class Group extends AbstractResource implements JsonSerializable
 {
+
+    /**
+     * @return int
+     *
+     * @deprecated 0.2.6 This has been removed from the API. This function will already return an invalid value and will be removed.
+     */
+    public function primaryAlliedGroupId() {
+        return -1;
+    }
+
+    /**
+     * @return boolean
+     *
+     * @deprecated 0.2.6 This has been removed from the API. This function will already return an invalid value and will be removed.
+     */
+    public function isAllianceOwner() {
+        return false;
+    }
 
     /**
      * @var string[] Array of string columns that will need to be converted to dates using getDateTime() in lieu of get()
@@ -89,7 +105,6 @@ class Group extends AbstractResource implements JsonSerializable
             'memberCount' => $this->memberCount(),
             'isPublic' => $this->isPublic(),
             'isPublicTopicAdminOnly' => $this->isPublicTopicAdminOnly(),
-            'primaryAlliedGroupId' => $this->primaryAlliedGroupId(),
             'motto' => $this->motto(),
             'allowChat' => $this->allowChat(),
             'isDefaultPostPublic' => $this->isDefaultPostPublic(),
@@ -99,7 +114,6 @@ class Group extends AbstractResource implements JsonSerializable
             'theme' => $this->theme(),
             'bannerPath' => $this->bannerPath(),
             'avatarPath' => $this->avatarPath(),
-            'isAllianceOwner' => $this->isAllianceOwner(),
             'conversationId' => $this->conversationId(),
             'enableInvitationMessagingForAdmins' => $this->enableInvitationMessagingForAdmins(),
             'banExpireDate' => $this->banExpireDate(),

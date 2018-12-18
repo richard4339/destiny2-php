@@ -1,0 +1,8 @@
+{
+  "Response": false,
+  "ErrorCode": 699,
+  "ThrottleSeconds": 0,
+  "ErrorStatus": "ClanApplicantInClanSoNowInvited",
+  "Message": "The clan applicant is already a member of a different clan.  Their application to this clan has been converted to a pending invitation, they must accept the invitation before the user will be a member of your clan.",
+  "MessageData": {}
+}
