@@ -2,13 +2,8 @@
 
 namespace Destiny\Tests;
 
-use Destiny\Client;
 use Destiny\Enums\BungieMembershipType;
-use Destiny\Exceptions\OAuthException;
-use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Client as GuzzleClient;
+use Destiny\Enums\RuntimeGroupMemberType;
 
 /**
  * Class GroupTest
@@ -286,6 +281,53 @@ class GroupTest extends ClientTestCase
         $this->client->setMock(__DIR__ . '/static/clanInviteMemberCancel-AccessDenied.json');
 
         $this->client->clanInviteMemberCancel(self::TEST_CLANID, BungieMembershipType::TIGERPSN, '12345');
+    }
+
+    /**
+     *
+     */
+    public function testGetClanMembersSuccess()
+    {
+
+        $this->client->setMock(__DIR__ . '/static/getClanMembers.json');
+
+        $results = $this->client->getClanMembers(self::TEST_CLANID);
+
+        $this->assertCount(87, $results);
+
+        $this->assertEquals(RuntimeGroupMemberType::BEGINNER, $results[0]->memberType());
+        $this->assertEquals(1, $results[0]->memberType());
+        $this->assertTrue($results[0]->isOnline());
+        $this->assertEquals(2114315, $results[0]->groupId());
+        $this->assertEquals(new \DateTime('2017-09-15T08:58:54Z'), $results[0]->joinDate());
+
+        $this->assertEquals("/img/theme/destiny/icons/icon_psn.png", $results[0]->destinyUserInfo()->iconPath());
+        $this->assertEquals(2, $results[0]->destinyUserInfo()->membershipType());
+        $this->assertEquals("4611686018465829068", $results[0]->destinyUserInfo()->membershipId());
+        $this->assertEquals("Harrax_Gamer", $results[0]->destinyUserInfo()->displayName());
+
+        $this->assertEquals("15884163", $results[0]->bungieNetUserInfo()->supplementalDisplayName());
+        $this->assertEquals("/img/profile/avatars/default_avatar.gif", $results[0]->bungieNetUserInfo()->iconPath());
+        $this->assertEquals(254, $results[0]->bungieNetUserInfo()->membershipType());
+        $this->assertEquals("15884163", $results[0]->bungieNetUserInfo()->membershipId());
+        $this->assertEquals("Harrax_Gamer", $results[0]->bungieNetUserInfo()->displayName());
+
+        $this->assertEquals(RuntimeGroupMemberType::BEGINNER, $results[1]->memberType());
+        $this->assertEquals(1, $results[1]->memberType());
+        $this->assertFalse($results[1]->isOnline());
+        $this->assertEquals(2114315, $results[1]->groupId());
+        $this->assertEquals(new \DateTime('2017-09-11T15:47:21Z'), $results[1]->joinDate());
+
+        $this->assertEquals("/img/theme/destiny/icons/icon_psn.png", $results[1]->destinyUserInfo()->iconPath());
+        $this->assertEquals(2, $results[1]->destinyUserInfo()->membershipType());
+        $this->assertEquals("4611686018432172351", $results[1]->destinyUserInfo()->membershipId());
+        $this->assertEquals("stingwray", $results[1]->destinyUserInfo()->displayName());
+
+        $this->assertEquals("9503851", $results[1]->bungieNetUserInfo()->supplementalDisplayName());
+        $this->assertEquals("/img/profile/avatars/default_avatar.gif", $results[1]->bungieNetUserInfo()->iconPath());
+        $this->assertEquals(254, $results[1]->bungieNetUserInfo()->membershipType());
+        $this->assertEquals("9503851", $results[1]->bungieNetUserInfo()->membershipId());
+        $this->assertEquals("stingwray", $results[1]->bungieNetUserInfo()->displayName());
     }
 
 }
