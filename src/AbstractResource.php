@@ -230,32 +230,35 @@ abstract class AbstractResource
      */
     public function getDateTime($key = null, $tz = null)
     {
+        try {
+            $string = $this->get($key);
 
-        $string = $this->get($key);
+            if (empty($string)) {
+                return false;
+            }
 
-        if (empty($string)) {
-            return false;
-        }
-
-        if (is_array($tz)) {
-            if (!empty($tz)) {
-                $tz = $tz[0];
-            } else {
+            if (is_array($tz)) {
+                if (!empty($tz)) {
+                    $tz = $tz[0];
+                } else {
+                    $tz = null;
+                }
+            } elseif (!is_string($tz)) {
                 $tz = null;
             }
-        } elseif (!is_string($tz)) {
-            $tz = null;
+
+            $date = new DateTime($string);
+
+            $timezone = new DateTimeZone($tz ?? $this->timezone);
+
+            if ($date->getTimezone()->getName() != $timezone->getName()) {
+                $date->setTimezone($timezone);
+            }
+
+            return $date;
+        } catch (\Exception $x) {
+            return null;
         }
-
-        $date = new DateTime($string);
-
-        $timezone = new DateTimeZone($tz ?? $this->timezone);
-
-        if ($date->getTimezone()->getName() != $timezone->getName()) {
-            $date->setTimezone($timezone);
-        }
-
-        return $date;
     }
 
     /**
