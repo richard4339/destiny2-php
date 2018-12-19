@@ -585,7 +585,7 @@ class Client
      * @param int $clanID
      * @param int|string $membershipType
      * @param int|string $membershipID
-     * @return mixed
+     * @return bool
      * @throws ApiKeyException
      * @throws ClientException
      * @throws OAuthException
@@ -612,7 +612,11 @@ class Client
         $response = $this->request($this->_buildRequestString('GroupV2',
             [$clanID, 'Members', $membershipType, $membershipID, 'Kick']), 'POST');
 
-        return $response;
+        if($response['ErrorCode'] === PlatformErrorCodes::SUCCESS) {
+            return true;
+        }
+
+        throw new ClientException($response['Message'], $response['ErrorCode']);
     }
 
     /**

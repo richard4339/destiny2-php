@@ -22,6 +22,7 @@ composer require richard4339/destiny2-php
 ### Upgrading
 #### To 0.3
 - `ClanApproveMember()` method now returns an object instead of a boolean. Any calls to this method that check for a boolean must change.
+- `ClanKickMember()` method now returns a boolean for success instead of the abstracted Guzzle response.
 
 ## Usage
 ```
