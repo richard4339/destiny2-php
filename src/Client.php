@@ -346,7 +346,13 @@ class Client
         } catch (GuzzleClientException $x) {
             switch ($x->getCode()) {
                 case 401:
-                    throw new OAuthException('401 Unauthorized');
+                    throw new OAuthException('401 Unauthorized', $x->getCode(), 0, '', $x);
+                    break;
+                case 405:
+                    throw new ClientException('405 Method Not Allowed', $x->getCode(), 0, '', $x);
+                    break;
+                case 504:
+                    throw new ClientException('504 Gateway Timeout', $x->getCode(), 0, '', $x);
                     break;
                 default:
                     throw $x;
