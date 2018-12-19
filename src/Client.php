@@ -415,7 +415,7 @@ class Client
         } else {
             $url = sprintf("%s/%s/?%s", self::URI, $endpoint, $query);
         }
-        $url = rtrim($url, '?/');
+        $url = rtrim($url, '?');
         return $url;
     }
 
