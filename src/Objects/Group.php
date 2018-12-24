@@ -52,6 +52,7 @@ class Group extends AbstractResource implements JsonSerializable
 {
 
     /**
+     * Deprecated function
      * @return int
      *
      * @deprecated 0.2.6 This has been removed from the API. This function will already return an invalid value and will be removed.
@@ -61,6 +62,7 @@ class Group extends AbstractResource implements JsonSerializable
     }
 
     /**
+     * Deprecated function
      * @return boolean
      *
      * @deprecated 0.2.6 This has been removed from the API. This function will already return an invalid value and will be removed.

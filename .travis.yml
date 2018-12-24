@@ -10,4 +10,4 @@ before_script:
 
 script:
   - vendor/phpunit/phpunit/phpunit -c phpunit.xml
- # - vendor/bin/phpdoc --template="checkstyle" -d src/ -t docs/ --cache-folder docs/cache/ && if [[ `cat "docs/checkstyle.xml" | grep "<error "` != "" ]]; then exit 1; fi
+  - vendor/bin/phpdoc --template="checkstyle" -d src/ -t docs/ --cache-folder docs/cache/ && if [[ `cat "docs/checkstyle.xml" | grep -v "No summary was found for this file" | grep "<error "` != "" ]]; then exit 1; fi
