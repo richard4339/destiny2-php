@@ -1,4 +1,7 @@
 <?php
+/**
+ * destiny2-php
+ */
 
 namespace Destiny\Enums;
 
