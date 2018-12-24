@@ -43,6 +43,7 @@ class GroupMember extends AbstractResource implements JsonSerializable
 
     /**
      * @var string[] Array of string columns that will need to be converted to dates using getDateTime() in lieu of get()
+     * @deprecated 0.3.0
      */
     protected $dates = [
         'joinDate'
