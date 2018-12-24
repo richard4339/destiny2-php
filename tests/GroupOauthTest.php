@@ -140,7 +140,7 @@ class GroupOauthTest extends ClientOauthTestCase
 
         $results = $this->client->clanKickMember(self::TEST_CLANID, BungieMembershipType::TIGERBLIZZARD, '12345');
 
-        $this->assertNotEmpty($results);
+        $this->assertTrue($results);
     }
 
     /**

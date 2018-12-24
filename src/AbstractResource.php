@@ -187,19 +187,25 @@ abstract class AbstractResource
     }
 
     /**
-     * Actually get the value for the key
+     * The Bungie API doesn't follow spec and reports the timezone as UTC despite it being Pacific. We have to manually fix this.
      *
-     * @param mixed|null $key
-     * @param mixed|null $default
-     * @return array|mixed|null
+     * @param null|string $date
+     * @return DateTime|null
+     *
+     * @deprecated 0.2.5 The UTC/Pacific conversion may have been a misunderstanding, regardless it no longer appears to occur. Removing it soon as the lone function call is being removed.
+     * @link https://github.com/Bungie-net/api/issues/353
      */
-    protected function get($key = null, $default = null)
+    private static function createDateTime(?string $date): ?DateTime
     {
-        if ($key === null) {
-            return $this->data ?? $default;
+        if (empty($date)) {
+            return new DateTime(null);
         }
 
-        return $this->data[$key] ?? $default;
+        $initialDate = new DateTime($date, new DateTimeZone('America/Los_Angeles'));
+
+        $date = new DateTime($initialDate->format('Y-m-d\TH:i:s'), new DateTimeZone('America/Los_Angeles'));
+
+        return $date;
     }
 
     /**
@@ -261,24 +267,18 @@ abstract class AbstractResource
     }
 
     /**
-     * The Bungie API doesn't follow spec and reports the timezone as UTC despite it being Pacific. We have to manually fix this.
+     * Actually get the value for the key
      *
-     * @param null|string $date
-     * @return DateTime|null
-     *
-     * @deprecated 0.2.5 The UTC/Pacific conversion may have been a misunderstanding, regardless it no longer appears to occur. Removing it soon as the lone function call is being removed.
-     * @link https://github.com/Bungie-net/api/issues/353
+     * @param mixed|null $key
+     * @param mixed|null $default
+     * @return array|mixed|null
      */
-    private static function createDateTime(?string $date): ?DateTime
+    protected function get($key = null, $default = null)
     {
-        if (empty($date)) {
-            return new DateTime(null);
+        if ($key === null) {
+            return $this->data ?? $default;
         }
 
-        $initialDate = new DateTime($date, new DateTimeZone('America/Los_Angeles'));
-
-        $date = new DateTime($initialDate->format('Y-m-d\TH:i:s'), new DateTimeZone('America/Los_Angeles'));
-
-        return $date;
+        return $this->data[$key] ?? $default;
     }
 }
