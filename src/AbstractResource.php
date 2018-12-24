@@ -41,7 +41,7 @@ use DateTimeZone;
  * Class AbstractResource
  * @package Destiny
  *
- * @method postMakeFromArray()
+ * @method mixed|null postMakeFromArray()
  */
 abstract class AbstractResource
 {
@@ -66,9 +66,20 @@ abstract class AbstractResource
     protected $arrays = [];
 
     /**
+     * Being replaced by more intelligent date parsing.
+     *
      * @var string[] Array of string columns that will need to be converted to dates using getDateTime() in lieu of get()
+     * @deprecated 0.3.0
+     *
+     * @see dateFormats[]
      */
     protected $dates = [];
+
+    /**
+     * @var string[] Format(s) to use when parsing a date variable to a DateTime
+     * @since 0.3.0
+     */
+    protected $dateFormats = ['Y-m-d\TH:i:sP', 'Y-m-d\TH:i:s.uP'];
 
     /**
      * @var array Array of columns that can be cast to an enum type
@@ -88,7 +99,6 @@ abstract class AbstractResource
      */
     function __construct()
     {
-
     }
 
     /**
@@ -217,11 +227,32 @@ abstract class AbstractResource
      */
     public function __call($name, $arguments)
     {
-        if (in_array($name, $this->dates)) {
-            return $this->getDateTime($name, $arguments);
+        if (is_string($this->get($name))) {
+            foreach ($this->dateFormats as $format) {
+                if (DateTime::createFromFormat($format, $this->get($name)) !== FALSE) {
+                    return $this->getDateTime($name, $arguments);
+                }
+            }
         }
+
         // No longer checking to see if this returns false since false is actually a valid return value for a boolean.
         return $this->get($name);
+    }
+
+    /**
+     * Actually get the value for the key
+     *
+     * @param mixed|null $key
+     * @param mixed|null $default
+     * @return array|mixed|null
+     */
+    protected function get($key = null, $default = null)
+    {
+        if ($key === null) {
+            return $this->data ?? $default;
+        }
+
+        return $this->data[$key] ?? $default;
     }
 
     /**
@@ -264,21 +295,5 @@ abstract class AbstractResource
         } catch (\Exception $x) {
             return null;
         }
-    }
-
-    /**
-     * Actually get the value for the key
-     *
-     * @param mixed|null $key
-     * @param mixed|null $default
-     * @return array|mixed|null
-     */
-    protected function get($key = null, $default = null)
-    {
-        if ($key === null) {
-            return $this->data ?? $default;
-        }
-
-        return $this->data[$key] ?? $default;
     }
 }
