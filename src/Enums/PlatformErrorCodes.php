@@ -5,6 +5,10 @@
 
 namespace Destiny\Enums;
 
+/**
+ * Class PlatformErrorCodes
+ * @package Destiny\Enums
+ */
 class PlatformErrorCodes implements Enum
 {
 
