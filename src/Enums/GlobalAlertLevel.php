@@ -42,6 +42,8 @@ class GlobalAlertLevel implements Enum
     const RED = 3;
 
     /**
+     * Returns the string version of the enum value
+     *
      * @param int $type
      * @return string
      */
