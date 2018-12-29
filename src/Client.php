@@ -1175,5 +1175,95 @@ class Client
         return $this;
     }
 
+    /**
+     * @return string
+     */
+    public function getAppName(): string
+    {
+        return $this->appName ?? '';
+    }
+
+    /**
+     * @param string $appName
+     * @return Client
+     */
+    public function setAppName(string $appName): Client
+    {
+        $this->appName = $appName ?? '';
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAppVersion(): string
+    {
+        return $this->appVersion ?? '';
+    }
+
+    /**
+     * @param string $appVersion
+     * @return Client
+     */
+    public function setAppVersion(string $appVersion): Client
+    {
+        $this->appVersion = $appVersion ?? '';
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAppIDNumber(): string
+    {
+        return $this->appIDNumber ?? '';
+    }
+
+    /**
+     * @param string $appIDNumber
+     * @return Client
+     */
+    public function setAppIDNumber(string $appIDNumber): Client
+    {
+        $this->appIDNumber = $appIDNumber ?? '';
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAppURL(): string
+    {
+        return $this->appURL ?? '';
+    }
+
+    /**
+     * @param string $appURL
+     * @return Client
+     */
+    public function setAppURL(string $appURL): Client
+    {
+        $this->appURL = $appURL ?? '';
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAppEmail(): string
+    {
+        return $this->appEmail ?? '';
+    }
+
+    /**
+     * @param string $appEmail
+     * @return Client
+     */
+    public function setAppEmail(string $appEmail): Client
+    {
+        $this->appEmail = $appEmail ?? '';
+        return $this;
+    }
+
 
 }
