@@ -86,80 +86,75 @@ class Client
     /**
      * @var string Destiny API Key
      */
-    protected $_apiKey;
+    protected $apiKey;
 
     /**
      * @var string Destiny Application Client ID
      * @link https://www.bungie.net/en/Application/
      */
-    protected $_clientID;
+    protected $clientID;
 
     /**
      * @var string Destiny Application Client Secret (for confidential only)
      * @link https://www.bungie.net/en/Application/
      */
-    protected $_clientSecret;
+    protected $clientSecret;
 
     /**
      * @var string Destiny OAuth Token
      */
-    protected $_oauthToken;
+    protected $oauthToken;
 
     /**
-     * @var GuzzleClient $_httpClient
+     * @var GuzzleClient $httpClient
      */
-    protected $_httpClient;
-
-    /**
-     * Used for User-Agent field
-     * @var string
-     */
-    protected $_appName;
+    protected $httpClient;
 
     /**
      * Used for User-Agent field
      * @var string
      */
-    protected $_appVersion;
+    protected $appName;
 
     /**
      * Used for User-Agent field
      * @var string
      */
-    protected $_appIDNumber;
+    protected $appVersion;
+
+    /**
+     * Used for User-Agent field
+     * @var string
+     */
+    protected $appIDNumber;
 
     /**
      * Used for User-Agent field
      * Do not include http:// or similar, ex. www.sample.net
      * @var string
      */
-    protected $_appURL;
+    protected $appURL;
 
     /**
      * Used for User-Agent field
      * @var string
      */
-    protected $_appEmail;
+    protected $appEmail;
 
     /**
      * Client constructor.
      * @param string $apiKey
-     * @param null|string $token
-     * @param null|string $clientID
-     * @param null|string $clientSecret
+     * @param string|null $token
+     * @param string|null $clientID
+     * @param string|null $clientSecret
+     * @param string|null $appName
+     * @param string|null $appVersion
+     * @param string|null $appIDNumber
+     * @param string|null $appURL
+     * @param string|null $appEmail
      * @throws ApiKeyException
      */
-    function __construct(
-        string $apiKey = '',
-        ?string $token = null,
-        ?string $clientID = null,
-        ?string $clientSecret = null,
-        ?string $appName = '',
-        ?string $appVersion = '',
-        ?string $appIDNumber = '',
-        ?string $appURL = '',
-        ?string $appEmail = ''
-    )
+    function __construct(string $apiKey = '', ?string $token = null, ?string $clientID = null, ?string $clientSecret = null, ?string $appName = '', ?string $appVersion = '', ?string $appIDNumber = '', ?string $appURL = '', ?string $appEmail = '')
     {
         if (empty($apiKey)) {
             $apiKey = $_ENV["APIKEY"];
@@ -169,38 +164,38 @@ class Client
             throw new ApiKeyException("API Key is not set");
         }
 
-        $this->_apiKey = $apiKey;
+        $this->apiKey = $apiKey;
 
         if (!empty($token)) {
-            $this->_oauthToken = $token;
+            $this->oauthToken = $token;
         }
 
         if (!empty($clientID)) {
-            $this->_clientID = $clientID;
+            $this->clientID = $clientID;
         }
 
         if (!empty($clientSecret)) {
-            $this->_clientSecret = $clientSecret;
+            $this->clientSecret = $clientSecret;
         }
 
         if (!empty($appName)) {
-            $this->_appName = $appName;
+            $this->appName = $appName;
         }
 
         if (!empty($appVersion)) {
-            $this->_appVersion = $appVersion;
+            $this->appVersion = $appVersion;
         }
 
         if (!empty($appIDNumber)) {
-            $this->_appIDNumber = $appIDNumber;
+            $this->appIDNumber = $appIDNumber;
         }
 
         if (!empty($appURL)) {
-            $this->_appURL = $appURL;
+            $this->appURL = $appURL;
         }
 
         if (!empty($appEmail)) {
-            $this->_appEmail = $appEmail;
+            $this->appEmail = $appEmail;
         }
     }
 
@@ -213,11 +208,10 @@ class Client
      */
     public function __get($name)
     {
-
         switch (strtoupper($name)) {
             case 'CLIENTID':
             case 'APIKEY':
-                return $this->_apiKey;
+                return $this->apiKey;
                 break;
             default:
                 return $this->$name;
@@ -250,9 +244,9 @@ class Client
     public function getGroup($group, $groupType = GroupType::CLAN)
     {
         if (is_integer($group)) {
-            $response = $this->request($this->_buildRequestString('GroupV2', [$group]));
+            $response = $this->request($this->buildRequestString('GroupV2', [$group]));
         } else {
-            $response = $this->request($this->_buildRequestString('GroupV2', ['Name', $group, $groupType]));
+            $response = $this->request($this->buildRequestString('GroupV2', ['Name', $group, $groupType]));
         }
         return GroupResponse::makeFromArray($response['Response']);
     }
@@ -311,7 +305,7 @@ class Client
     protected function internalRequest($url, string $method = 'GET', array $extraParameters = null)
     {
 
-        if (empty($this->_apiKey)) {
+        if (empty($this->apiKey)) {
             throw new ApiKeyException("API Key is not set");
         }
 
@@ -320,16 +314,16 @@ class Client
             $method = 'GET';
         }
 
-        $userAgent = sprintf('%s/%s AppId/%s (+%s;%s)', $this->_appName ?? '', $this->_appVersion ?? '',
-            $this->_appIDNumber ?? '', $this->_appURL ?? '', $this->_appEmail ?? '');
+        $userAgent = sprintf('%s/%s AppId/%s (+%s;%s)', $this->appName ?? '', $this->appVersion ?? '',
+            $this->appIDNumber ?? '', $this->appURL ?? '', $this->appEmail ?? '');
 
         $headers = [
             'User-Agent' => $userAgent,
-            'X-Api-Key' => $this->_apiKey
+            'X-Api-Key' => $this->apiKey
         ];
 
-        if (!empty($this->_oauthToken)) {
-            $headers['Authorization'] = sprintf('Bearer %s', $this->_oauthToken);
+        if (!empty($this->oauthToken)) {
+            $headers['Authorization'] = sprintf('Bearer %s', $this->oauthToken);
         }
 
         $params = [
@@ -368,11 +362,11 @@ class Client
      */
     protected function getHttpClient()
     {
-        if ($this->_httpClient === null) {
-            $this->_httpClient = new GuzzleClient(['base_uri' => self::URI, 'verify' => false]);
+        if ($this->httpClient === null) {
+            $this->httpClient = new GuzzleClient(['base_uri' => self::URI, 'verify' => false]);
         }
 
-        return $this->_httpClient;
+        return $this->httpClient;
     }
 
     /**
@@ -403,7 +397,7 @@ class Client
      * @param array|null $queryParams
      * @return string
      */
-    protected function _buildRequestString($endpoint, array $uriParams = null, array $queryParams = null)
+    protected function buildRequestString($endpoint, array $uriParams = null, array $queryParams = null)
     {
         $query = '';
         if (!empty($queryParams)) {
@@ -444,7 +438,7 @@ class Client
         if ($includeStreaming) {
             $queryParms['includestreaming'] = $includeStreaming;
         }
-        $response = $this->request($this->_buildRequestString('GlobalAlerts', [],
+        $response = $this->request($this->buildRequestString('GlobalAlerts', [],
             $queryParms));
 
         return array_map(function ($item) {
@@ -467,7 +461,7 @@ class Client
      */
     public function getClanMembers($clanID, $currentPage = 1)
     {
-        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'Members'],
+        $response = $this->request($this->buildRequestString('GroupV2', [$clanID, 'Members'],
             ['currentPage' => $currentPage]));
 
         return array_map(function ($item) {
@@ -490,7 +484,7 @@ class Client
      */
     public function getClanAdminsAndFounder($clanID, $currentPage = 1)
     {
-        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'AdminsAndFounder'],
+        $response = $this->request($this->buildRequestString('GroupV2', [$clanID, 'AdminsAndFounder'],
             ['currentPage' => $currentPage]));
 
         return array_map(function ($item) {
@@ -515,11 +509,11 @@ class Client
      */
     public function getClanBannedMembers($clanID, $currentPage = 1)
     {
-        if (empty($this->_oauthToken)) {
+        if (empty($this->oauthToken)) {
             throw new OAuthException();
         }
 
-        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'Banned'],
+        $response = $this->request($this->buildRequestString('GroupV2', [$clanID, 'Banned'],
             ['currentPage' => $currentPage]));
 
         return array_map(function ($item) {
@@ -542,11 +536,11 @@ class Client
      */
     public function getClanPendingMembers($clanID, $currentPage = 1)
     {
-        if (empty($this->_oauthToken)) {
+        if (empty($this->oauthToken)) {
             throw new OAuthException();
         }
 
-        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'Members', 'Pending'],
+        $response = $this->request($this->buildRequestString('GroupV2', [$clanID, 'Members', 'Pending'],
             ['currentPage' => $currentPage]));
 
         return array_map(function ($item) {
@@ -569,11 +563,11 @@ class Client
      */
     public function getClanInvitedMembers($clanID, $currentPage = 1)
     {
-        if (empty($this->_oauthToken)) {
+        if (empty($this->oauthToken)) {
             throw new OAuthException();
         }
 
-        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'Members', 'InvitedIndividuals'],
+        $response = $this->request($this->buildRequestString('GroupV2', [$clanID, 'Members', 'InvitedIndividuals'],
             ['currentPage' => $currentPage]));
 
         return array_map(function ($item) {
@@ -597,7 +591,7 @@ class Client
      */
     public function clanKickMember(int $clanID, $membershipType, $membershipID)
     {
-        if (empty($this->_oauthToken)) {
+        if (empty($this->oauthToken)) {
             throw new OAuthException();
         }
 
@@ -609,10 +603,10 @@ class Client
             throw new ClientException('An invalid MembershipType was supplied.');
         }
 
-        $response = $this->request($this->_buildRequestString('GroupV2',
+        $response = $this->request($this->buildRequestString('GroupV2',
             [$clanID, 'Members', $membershipType, $membershipID, 'Kick']), 'POST');
 
-        if($response['ErrorCode'] === PlatformErrorCodes::SUCCESS) {
+        if ($response['ErrorCode'] === PlatformErrorCodes::SUCCESS) {
             return true;
         }
 
@@ -636,7 +630,7 @@ class Client
      */
     public function clanApproveMember(int $clanID, $membershipType, $membershipID)
     {
-        if (empty($this->_oauthToken)) {
+        if (empty($this->oauthToken)) {
             throw new OAuthException();
         }
 
@@ -648,7 +642,7 @@ class Client
             throw new ClientException('An invalid MembershipType was supplied.');
         }
 
-        $response = $this->request($this->_buildRequestString('GroupV2',
+        $response = $this->request($this->buildRequestString('GroupV2',
             [$clanID, 'Members', 'Approve', $membershipType, $membershipID]), 'POST',
             [
                 'json' =>
@@ -677,7 +671,7 @@ class Client
     public function clanDenyMember(int $clanID, $membershipType, $membershipID, string $displayName)
     {
 
-        if (empty($this->_oauthToken)) {
+        if (empty($this->oauthToken)) {
             throw new OAuthException();
         }
 
@@ -689,7 +683,7 @@ class Client
         $member = new UserMembership($membershipType, $membershipID, $displayName);
 
         ///GroupV2/{groupId}/Members/DenyList/
-        $response = $this->request($this->_buildRequestString('GroupV2', [$clanID, 'Members', 'DenyList']), 'POST',
+        $response = $this->request($this->buildRequestString('GroupV2', [$clanID, 'Members', 'DenyList']), 'POST',
             [
                 'json' =>
                     [
@@ -723,7 +717,7 @@ class Client
      */
     public function clanInviteMember(int $clanID, $membershipType, $membershipID)
     {
-        if (empty($this->_oauthToken)) {
+        if (empty($this->oauthToken)) {
             throw new OAuthException();
         }
 
@@ -735,7 +729,7 @@ class Client
             throw new ClientException('An invalid MembershipType was supplied.');
         }
 
-        $response = $this->request($this->_buildRequestString('GroupV2',
+        $response = $this->request($this->buildRequestString('GroupV2',
             [$clanID, 'Members', 'IndividualInvite', $membershipType, $membershipID]), 'POST',
             [
                 'json' =>
@@ -769,7 +763,7 @@ class Client
      */
     public function clanInviteMemberCancel(int $clanID, $membershipType, $membershipID)
     {
-        if (empty($this->_oauthToken)) {
+        if (empty($this->oauthToken)) {
             throw new OAuthException();
         }
 
@@ -781,7 +775,7 @@ class Client
             throw new ClientException('An invalid MembershipType was supplied.');
         }
 
-        $response = $this->request($this->_buildRequestString('GroupV2',
+        $response = $this->request($this->buildRequestString('GroupV2',
             [$clanID, 'Members', 'IndividualInviteCancel', $membershipType, $membershipID]), 'POST');
 
         if ($response['ErrorStatus'] == "Success") {
@@ -809,10 +803,10 @@ class Client
      */
     public function getCurrentBungieUser()
     {
-        if (empty($this->_oauthToken)) {
+        if (empty($this->oauthToken)) {
             throw new OAuthException();
         }
-        $response = $this->request($this->_buildRequestString('User', ['GetCurrentBungieNetUser']));
+        $response = $this->request($this->buildRequestString('User', ['GetCurrentBungieNetUser']));
 
         return GeneralUser::makeFromArray($response['Response']);
     }
@@ -849,7 +843,7 @@ class Client
             }
         }
 
-        $response = $this->request($this->_buildRequestString('Destiny2', [$membershipType, 'Profile', $membershipID],
+        $response = $this->request($this->buildRequestString('Destiny2', [$membershipType, 'Profile', $membershipID],
             ['components' => implode(',', $params)]));
 
         $profileResponse = new DestinyProfileResponse();
@@ -876,7 +870,7 @@ class Client
      */
     public function getMobileWorldContentsPath($locale = "en")
     {
-        $response = $this->request($this->_buildRequestString('Destiny2', ['Manifest']));
+        $response = $this->request($this->buildRequestString('Destiny2', ['Manifest']));
 
         return $response['Response']['mobileWorldContentPaths'][$locale];
     }
@@ -895,7 +889,7 @@ class Client
      */
     public function getBungieUser($userID)
     {
-        $response = $this->request($this->_buildRequestString('User', ['GetBungieNetUserById', $userID]));
+        $response = $this->request($this->buildRequestString('User', ['GetBungieNetUserById', $userID]));
 
         return GeneralUser::makeFromArray($response['Response']);
     }
@@ -911,10 +905,10 @@ class Client
      */
     public function getMembershipDataForCurrentUser()
     {
-        if (empty($this->_oauthToken)) {
+        if (empty($this->oauthToken)) {
             throw new OAuthException();
         }
-        $response = $this->request($this->_buildRequestString('User', ['GetMembershipsForCurrentUser']));
+        $response = $this->request($this->buildRequestString('User', ['GetMembershipsForCurrentUser']));
 
         return [
             $response['Response']['destinyMemberships'], //TODO:  make UserInfoCard
@@ -935,7 +929,7 @@ class Client
      */
     public function getBungieAccount($membershipType, $membershipID)
     {
-        $response = $this->request($this->_buildRequestString('User',
+        $response = $this->request($this->buildRequestString('User',
             ['GetBungieAccount', $membershipID, $membershipType]));
 
         return $response;
@@ -955,7 +949,7 @@ class Client
      */
     public function getGroupV2User($membershipType, $membershipID)
     {
-        $response = $this->request($this->_buildRequestString('GroupV2',
+        $response = $this->request($this->buildRequestString('GroupV2',
             ['User', $membershipType, $membershipID, 0, 1]));
 
         return $response['Response']['results'];
@@ -993,7 +987,7 @@ class Client
         ...$components
     )
     {
-        if (empty($this->_oauthToken)) {
+        if (empty($this->oauthToken)) {
             throw new OAuthException();
         }
 
@@ -1014,7 +1008,7 @@ class Client
             }
         }
 
-        if (!self::_validateComponents($params, [
+        if (!self::validateComponents($params, [
             DestinyComponentType::VENDORS,
             DestinyComponentType::VENDORCATEGORIES,
             DestinyComponentType::VENDORSALES
@@ -1027,7 +1021,7 @@ class Client
         if (!empty($vendor)) {
             $uriParams[] = $vendor;
         }
-        $response = $this->request($this->_buildRequestString('Destiny2', $uriParams,
+        $response = $this->request($this->buildRequestString('Destiny2', $uriParams,
             ['components' => implode(',', $params)]));
 
         $profileResponse = new DestinyVendorResponse();
@@ -1050,7 +1044,7 @@ class Client
      * @param string[]|int[] $allowedComponents
      * @return bool
      */
-    protected static function _validateComponents(array $components, array $allowedComponents): bool
+    protected static function validateComponents(array $components, array $allowedComponents): bool
     {
         $allowed = [];
         foreach ($allowedComponents as $i) {
@@ -1085,7 +1079,7 @@ class Client
      */
     public function getPartnerships($userID)
     {
-        $response = $this->request($this->_buildRequestString('User', [$userID, 'Partnerships']));
+        $response = $this->request($this->buildRequestString('User', [$userID, 'Partnerships']));
 
         if (empty($response['Response'])) {
             throw new ClientException('No results found');
@@ -1106,7 +1100,7 @@ class Client
         ]);
 
         $handler = HandlerStack::create($mock);
-        $this->_httpClient = new GuzzleClient(['handler' => $handler]);
+        $this->httpClient = new GuzzleClient(['handler' => $handler]);
     }
 
     /**
@@ -1114,7 +1108,7 @@ class Client
      */
     public function getApiKey(): ?string
     {
-        return $this->_apiKey;
+        return $this->apiKey;
     }
 
     /**
@@ -1123,7 +1117,7 @@ class Client
      */
     public function setApiKey(?string $apiKey): Client
     {
-        $this->_apiKey = $apiKey;
+        $this->apiKey = $apiKey;
         return $this;
     }
 
@@ -1132,7 +1126,7 @@ class Client
      */
     public function getClientID(): ?string
     {
-        return $this->_clientID;
+        return $this->clientID;
     }
 
     /**
@@ -1141,7 +1135,7 @@ class Client
      */
     public function setClientID(?string $clientID): Client
     {
-        $this->_clientID = $clientID;
+        $this->clientID = $clientID;
         return $this;
     }
 
@@ -1150,7 +1144,7 @@ class Client
      */
     public function getClientSecret(): ?string
     {
-        return $this->_clientSecret;
+        return $this->clientSecret;
     }
 
     /**
@@ -1159,7 +1153,7 @@ class Client
      */
     public function setClientSecret(?string $clientSecret): Client
     {
-        $this->_clientSecret = $clientSecret;
+        $this->clientSecret = $clientSecret;
         return $this;
     }
 
@@ -1168,7 +1162,7 @@ class Client
      */
     public function getOauthToken(): ?string
     {
-        return $this->_oauthToken;
+        return $this->oauthToken;
     }
 
     /**
@@ -1177,7 +1171,7 @@ class Client
      */
     public function setOauthToken(?string $oauthToken): Client
     {
-        $this->_oauthToken = $oauthToken;
+        $this->oauthToken = $oauthToken;
         return $this;
     }
 
