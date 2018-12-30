@@ -42,4 +42,4 @@ matrix:
         - secure: "O4F1+EoGMo1g6IPZhPZcqP0MnkpW13lly4SpZ2+k/bViHSlEIxxwzew1nvgq6z7KthjIpcVJPhM2Ny1PR32LtDaHogpzH9lmN67/sGyy9aXs+cO4rPx+oRbdd1U4o8tKKOTmP4HAttvDHJuPrnQcf5IXhl+YXLzy8Btwy381FsoOk0rNt3n719gU+byNTRbpRUCAlVfItQC654la9z/MTxoCN3TbWlNDDMZyaJqJV6P5lpmBcFy0Jmj5qBlew/V1avg3GcPAnUpgkF0JjIMGEpxor6FjEW3X1rcU0C9ENfoqKf3KXaVQdZAu80SNoiYoLB1vvsi83Dhw1QELU46J3/ibnmuQBpNHE3+kvZbUePGpwbnUsesLep+Mve2bJ43tlVY2VEa8MlBqOE2YfNZW+nqeUuFKNBU07QyWSNcjxsZnce2R0HXPg/crT/rqiOzp+y+Jqb31X9psnjWT1wY6pksI8pQOz+NduvLlNVabP/wPrPUKa8TpkKNtINdVmeuFdzF1vFysYU5bhU/PvFcBZXG/76iPGvxPDPBA1cq3TaKxac8e3QAqK7chmaiBgW3UhxffERfXiC+0gE6vcQ8ZLTyq69CGNybOTrDDxeswlHPvO4/Iw10M6xSOUECkPM+ZusGk0cg/q5XybhwaVeMf4iUvGHo5g5lI0u2GV0aZpoo="
 
 after_success:
-  - travis_retry php vendor/bin/php-coveralls
+  - travis_retry vendor/bin/php-coveralls -v
