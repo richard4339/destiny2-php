@@ -10,9 +10,6 @@
          stopOnError="false"
          stopOnFailure="false"
          verbose="true">
-    <php>
-        <env name="APIKEY" value="FAKE"/>
-    </php>
     <testsuites>
         <testsuite name="Destiny PHP API">
             <directory suffix="Test.php">./tests</directory>
