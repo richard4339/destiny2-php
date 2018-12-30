@@ -3,10 +3,6 @@ language: php
 before_script:
   - composer install
 
-env:
-  global:
-    - secure: "puMrD7UjQCczxo2FKXaIGV2hTQ5sYauIhnziFpBEshYWgFTvkttLcXXR4x7HZFWqYDa0RnR+ILW2MImP9IH4/vywtbJigkNb/NSwCUQu/mZzF6dvX+Oo1HIK5tmKToEtsQqgim5pwg7gBGAkpOYNoWmZezPv9JK91RkACuAN3ijZkLE+uXse+xcFSNMJZo1NAsHmaR4qxTGK16h03smrgumoy0ilq1IT3gOMJp3wLW3D+oyc+eX5sJ+rjAkVVTmd5JSwKzm1uvcS7QwV19Hp1CL2WfhlRdvWhRDFLZrYmxd/sTHWkhpSL042n4VNM36ZAMHidkWYviK+yqPww/eAKnZ1g9A7Ius8HvT01bF2endYrVs9M4v+uVZzpyaD6gl8xWT4B6Xrb8n2XzVonBrUobke0HdrJFPDuM9R/uKGVOsjiExJB4EpbURfMSBa+h72+HBRkCUjumH+6zTQ9JLN6YiyLCpqsVwPQjl2nWboEEqf3cvOll3Yw+pbJb5ZS3clU80EUGjKc5cH42HbInW4JqdBeAVZxWMg0PC+763Jshc09XIp7apSqq1Y6JnqCrXKzEgdzOgqHpbNaOtAylijYohVj3cJeG6LXD/3KO3DidFjcc7J8iVoALoatP0ktDOXPrM96XMmjT0IjhLVkN+DafQYB1h/Wdjx3K77ljQ1zyk="
-
 script:
   - mkdir -p build/logs
   - vendor/phpunit/phpunit/phpunit -c phpunit.xml
