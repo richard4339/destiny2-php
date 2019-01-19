@@ -17,6 +17,7 @@ use Destiny\Enums\PlatformErrorCodes;
 use Destiny\Exceptions\AuthException;
 use Destiny\Exceptions\ClientException;
 use Destiny\Exceptions\ApiKeyException;
+use Destiny\Exceptions\Exception;
 use Destiny\Exceptions\OAuthException;
 use Destiny\Objects\ClanApproveMember;
 use Destiny\Objects\DestinyCharacterComponent;
@@ -33,11 +34,28 @@ use Destiny\Objects\UserMembership;
 use Destiny\Objects\Vendor;
 use Destiny\Objects\VendorSale;
 use GuzzleHttp\Exception\ClientException as GuzzleClientException;
-use GuzzleHttp\Client as GuzzleClient;
-use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
+use Http\Client\Common\Exception\ClientErrorException;
+use Http\Client\Common\HttpMethodsClient;
+use Http\Client\Common\Plugin;
+use Http\Client\Common\Plugin\AuthenticationPlugin;
+use Http\Client\Common\Plugin\BaseUriPlugin;
+use Http\Client\Common\Plugin\ContentTypePlugin;
+use Http\Client\Common\Plugin\ErrorPlugin;
+use Http\Client\Common\Plugin\HeaderDefaultsPlugin;
+use Http\Client\Common\Plugin\RetryPlugin;
+use Http\Client\Common\PluginClient;
+use Http\Client\Exception as HttpClientException;
+use Http\Client\HttpClient;
+use Http\Discovery\HttpClientDiscovery;
+use Http\Discovery\MessageFactoryDiscovery;
+use Http\Discovery\UriFactoryDiscovery;
+use Http\Message\Authentication\Bearer;
+use Http\Message\MessageFactory;
+use Http\Message\ResponseFactory;
+use Psr\Http\Message\RequestInterface;
 
 /**
  * Class Client
@@ -79,9 +97,9 @@ use GuzzleHttp\HandlerStack;
 class Client
 {
     /**
-     *
+     * @var string Bungie API uri/host
      */
-    const URI = "https://www.bungie.net/Platform";
+    protected $uri = "https://www.bungie.net/Platform";
 
     /**
      * @var string Destiny API Key
@@ -106,9 +124,24 @@ class Client
     protected $oauthToken;
 
     /**
-     * @var GuzzleClient $httpClient
+     * @var HttpMethodsClient $httpClient
      */
     protected $httpClient;
+
+    /**
+     * @var MessageFactory
+     */
+    protected $messageFactory;
+
+    /**
+     * @var bool Automatically retry the API call if it errors out?
+     */
+    protected $retryOnRateLimit = true;
+
+    /**
+     * @var int Number of times to re-attempt an API call
+     */
+    protected $maxReplyAttempts = 5;
 
     /**
      * Used for User-Agent field
@@ -143,7 +176,7 @@ class Client
 
     /**
      * Client constructor.
-     * @param string $apiKey
+     * @param string|null $apiKey If empty will attempt to read from the environmental variable APIKEY
      * @param string|null $token
      * @param string|null $clientID
      * @param string|null $clientSecret
@@ -154,7 +187,7 @@ class Client
      * @param string|null $appEmail
      * @throws ApiKeyException
      */
-    function __construct(string $apiKey = '', ?string $token = null, ?string $clientID = null, ?string $clientSecret = null, ?string $appName = '', ?string $appVersion = '', ?string $appIDNumber = '', ?string $appURL = '', ?string $appEmail = '')
+    function __construct(?string $apiKey = null, ?string $token = null, ?string $clientID = null, ?string $clientSecret = null, ?string $appName = '', ?string $appVersion = '', ?string $appIDNumber = '', ?string $appURL = '', ?string $appEmail = '')
     {
         if (empty($apiKey)) {
             $apiKey = $_ENV["APIKEY"];
@@ -200,26 +233,6 @@ class Client
     }
 
     /**
-     * @param string $name
-     * @return mixed|null
-     *
-     * @deprecated 0.2.0 Since these are simply placeholder/helper wrappers and we want to keep things consistent, use
-     * the new get/set functions instead
-     */
-    public function __get($name)
-    {
-        switch (strtoupper($name)) {
-            case 'CLIENTID':
-            case 'APIKEY':
-                return $this->apiKey;
-                break;
-            default:
-                return $this->$name;
-                break;
-        }
-    }
-
-    /**
      * Get a Bungie group either by name with grouptype or by groupID (grouptype is ignored with a groupID).
      * Note that a group with a numeric only name will not work here as this function will see it as a groupID
      *
@@ -234,7 +247,6 @@ class Client
      * @throws AuthException
      * @throws ClientException
      * @throws OAuthException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * OAuth token optional. Passing an OAuth token for a user in the requested group will cause it to return more info.
      *
@@ -261,7 +273,6 @@ class Client
      * @throws ClientException
      * @throws OAuthException
      * @throws AuthException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     protected function request($url, string $method = 'GET', array $extraParameters = null, array $allowedErrorCodes = null)
     {
@@ -294,15 +305,18 @@ class Client
     }
 
     /**
-     * @param $url
+     * @param string $url
      * @param string $method
-     * @param array|null $extraParameters
-     * @return mixed|\Psr\Http\Message\ResponseInterface
+     * @param array|null $body
+     * @return \Psr\Http\Message\ResponseInterface
+     *
      * @throws ApiKeyException
+     * @throws ClientException
+     * @throws Exception
+     * @throws HttpClientException
      * @throws OAuthException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    protected function internalRequest($url, string $method = 'GET', array $extraParameters = null)
+    protected function internalRequest(string $url, string $method = 'GET', array $body = null)
     {
 
         if (empty($this->apiKey)) {
@@ -314,30 +328,11 @@ class Client
             $method = 'GET';
         }
 
-        $userAgent = sprintf('%s/%s AppId/%s (+%s;%s)', $this->appName ?? '', $this->appVersion ?? '',
-            $this->appIDNumber ?? '', $this->appURL ?? '', $this->appEmail ?? '');
-
-        $headers = [
-            'User-Agent' => $userAgent,
-            'X-Api-Key' => $this->apiKey
-        ];
-
-        if (!empty($this->oauthToken)) {
-            $headers['Authorization'] = sprintf('Bearer %s', $this->oauthToken);
-        }
-
-        $params = [
-            'headers' => $headers
-        ];
-
-        if (!empty($extraParameters)) {
-            $params = array_merge($params, $extraParameters);
-        }
+        $this->getHttpClient([], $this->httpClient, $this->messageFactory);
 
         try {
-            $response = $this->getHttpClient()
-                ->request($method, $url, $params);
-        } catch (GuzzleClientException $x) {
+            $response = $this->httpClient->send($method, $url, [], json_encode($body));
+        } catch (ClientErrorException $x) {
             switch ($x->getCode()) {
                 case 401:
                     throw new OAuthException('401 Unauthorized', $x->getCode(), 0, '', $x);
@@ -358,15 +353,225 @@ class Client
     }
 
     /**
-     * @return GuzzleClient
+     * @param Plugin[] $plugins
+     * @param HttpClient|null $httpClient
+     * @param MessageFactory|null $messageFactory
+     * @return HttpMethodsClient
+     * @throws Exception
      */
-    protected function getHttpClient()
+    protected function getHttpClient(array $plugins = [], ?HttpClient $httpClient = null, ?MessageFactory $messageFactory = null): HttpMethodsClient
     {
-        if ($this->httpClient === null) {
-            $this->httpClient = new GuzzleClient(['base_uri' => self::URI, 'verify' => false]);
+        $userAgent = sprintf('%s/%s AppId/%s (+%s;%s)', $this->appName ?? '', $this->appVersion ?? '',
+            $this->appIDNumber ?? '', $this->appURL ?? '', $this->appEmail ?? '');
+
+        if (!$httpClient) {
+            $httpClient = HttpClientDiscovery::find();
+        }
+        $plugins[] = new ContentTypePlugin();
+        $plugins[] = new HeaderDefaultsPlugin([
+            'User-Agent' => $userAgent,
+            'X-Api-Key' => $this->apiKey
+        ]);
+
+        if (empty($this->uri)) {
+            throw new Exception('Bungie API URI is not set.');
         }
 
+        $plugins[] = new BaseUriPlugin(UriFactoryDiscovery::find()->createUri($this->uri));
+
+        if (!empty($this->oauthToken)) {
+            $authentication = new Bearer($this->oauthToken);
+            $plugins[] = new AuthenticationPlugin($authentication);
+        }
+
+        if ($this->retryOnRateLimit) {
+            $plugins[] = new RetryPlugin([
+                'retries' => $this->maxReplyAttempts,
+                'exception_decider' => $this->retryDecider(),
+                'exception_delay' => $this->retryDelay()
+            ]);
+        }
+        $plugins[] = new ErrorPlugin();
+
+        $pluginClient = new PluginClient($httpClient, $plugins);
+
+        if (!$messageFactory) {
+            $this->messageFactory = MessageFactoryDiscovery::find();
+        }
+
+        $this->httpClient = new HttpMethodsClient($pluginClient, $this->messageFactory);
+
         return $this->httpClient;
+    }
+
+    /**
+     * Shim for testing the API by file
+     *
+     * @param string $responseFile
+     * @param int $statusCode HTTP Response Code (Defaults to 200)
+     * @param MessageFactory|null $messageFactory
+     */
+    public function setMock($responseFile, $statusCode = 200, ?MessageFactory $messageFactory = null)
+    {
+        $this->setupMock($messageFactory);
+
+        $response = $this->messageFactory->createResponse($statusCode, 'REASON?', [], file_get_contents($responseFile));
+
+        //$response = $this->creat
+        $this->httpClient->addResponse($response);
+//        $mock = new MockHandler([
+//            new Response($statusCode, ['Content-Type' => 'application/json'], file_get_contents($responseFile))
+//        ]);
+//
+//        $handler = HandlerStack::create($mock);
+//        $this->httpClient = new GuzzleClient(['handler' => $handler]);
+    }
+
+    /**
+     * Shim for testing the API by building a response
+     *
+     * @param string $responseFile
+     * @param int $statusCode HTTP Response Code (Defaults to 200)
+     * @param MessageFactory|null $messageFactory
+     */
+    public function buildMock($response, int $errorCode = 1, string $errorStatus = 'Success', int $throttleSeconds = 0, string $message = 'Ok', $messageData = null, $statusCode = 200, ?MessageFactory $messageFactory = null)
+    {
+        $this->setupMock($messageFactory);
+        
+        $body = json_encode([
+            "Response" => $response,
+          "ErrorCode" => $errorCode,
+          "ThrottleSeconds" => $throttleSeconds,
+          "ErrorStatus" => $errorStatus,
+          "Message" => $message,
+          "MessageData" => $messageData
+        ]);
+
+        $httpResponse = $this->messageFactory->createResponse($statusCode, 'REASON?', [], $body);
+
+        $this->httpClient->addResponse($httpResponse);
+
+    }
+
+    /**
+     * @param MessageFactory|null $messageFactory
+     */
+    protected function setupMock(MessageFactory $messageFactory = null)
+    {
+        if(empty($this->httpClient)) {
+            $this->httpClient = new \Http\Mock\Client();
+        }
+
+        if (!$messageFactory) {
+            $this->messageFactory = MessageFactoryDiscovery::find();
+        }        
+    }
+
+    /**
+     * If we received error 429 (Rate limit) or 504 (Gateway timeout) try again
+     * @return \Closure
+     *
+     * @todo Need to handle rate limits better, Bungie isn't returning 429 for rate limits
+     */
+    protected function retryDecider()
+    {
+        return function (
+            RequestInterface $request,
+            HttpClientException $exception = null
+        ) {
+
+            $response = $exception->getResponse();
+
+            if (self::isAuthenticationError($response)) {
+                return false;
+            }
+            if (self::isGatewayTimeout($response) || self::isRateLimit($response)) {
+                return true;
+            }
+            if (!(self::isServerError($response))) {
+                return false;
+            }
+
+            return true;
+        };
+    }
+
+    /**
+     * @param ResponseFactory|null $response
+     * @return bool
+     */
+    protected static function isAuthenticationError($response = null)
+    {
+        return self::isResponseStatusCode($response, 401);
+    }
+
+    /**
+     * @param ResponseFactory|null $response
+     * @param int $statusCode
+     * @return bool
+     */
+    protected static function isResponseStatusCode($response = null, int $statusCode = 0)
+    {
+        return $response && $response->getStatusCode() == $statusCode;
+
+    }
+
+    /**
+     * @param ResponseFactory|null $response
+     * @return bool
+     */
+    protected static function isGatewayTimeout($response = null)
+    {
+        return self::isResponseStatusCode($response, 504);
+    }
+
+    /**
+     * @param ResponseFactory|null $response
+     * @return bool
+     *
+     * @todo Need to handle rate limits better, Bungie isn't returning 429 for rate limits
+     */
+    protected static function isRateLimit($response = null)
+    {
+        return self::isResponseStatusCode($response, 429);
+    }
+
+    /**
+     * @param ResponseFactory|null $response
+     * @return bool
+     */
+    protected static function isServerError($response = null)
+    {
+        return $response && $response->getStatusCode() >= 500 && $response->getStatusCode() != 504;
+    }
+
+    /**
+     * How long should we wait before retrying?
+     *
+     * @return \Closure The number of microseconds to wait before retrying
+     *
+     * @todo Properly handle the throttle seconds
+     */
+    protected function retryDelay()
+    {
+        return function (
+            RequestInterface $request,
+            HttpClientException $exception,
+            int $numberOfRetries
+        ) {
+            $delay = 0;
+            $response = $exception->getResponse();
+            if (self::isGatewayTimeout($response)) {
+                $delay = 5;
+            }
+            if (self::isRateLimit($response)) {
+                $delay = 10;
+            }
+            if ($delay <= 0) {
+                $delay = RetryPlugin::defaultDelay($request, $exception, $numberOfRetries);
+            }
+            return $delay * 1000000; // Delay is seconds and the function wants microseconds.
+        };
     }
 
     /**
@@ -405,12 +610,30 @@ class Client
         }
         $url = '';
         if (!empty($uriParams)) {
-            $url = sprintf("%s/%s/%s/?%s", self::URI, $endpoint, implode("/", $uriParams), $query);
+            $url = sprintf("%s/%s/%s/?%s", $this->uri, $endpoint, implode("/", $uriParams), $query);
         } else {
-            $url = sprintf("%s/%s/?%s", self::URI, $endpoint, $query);
+            $url = sprintf("%s/%s/?%s", $this->uri, $endpoint, $query);
         }
         $url = rtrim($url, '?');
         return $url;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUri(): string
+    {
+        return $this->uri;
+    }
+
+    /**
+     * @param string $uri
+     * @return Client
+     */
+    public function setUri(string $uri): Client
+    {
+        $this->uri = $uri;
+        return $this;
     }
 
     /**
@@ -423,7 +646,6 @@ class Client
      * @throws AuthException
      * @throws ClientException
      * @throws OAuthException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * @link https://bungie-net.github.io/multi/operation_get_-GetGlobalAlerts.html#operation_get_-GetGlobalAlerts
      *
@@ -455,7 +677,6 @@ class Client
      * @throws AuthException
      * @throws ClientException
      * @throws OAuthException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * @link https://bungie-net.github.io/multi/operation_get_GroupV2-GetMembersOfGroup.html#operation_get_GroupV2-GetMembersOfGroup
      */
@@ -478,7 +699,6 @@ class Client
      * @throws AuthException
      * @throws ClientException
      * @throws OAuthException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * @link https://bungie-net.github.io/multi/operation_get_GroupV2-GetAdminsAndFounderOfGroup.html#operation_get_GroupV2-GetAdminsAndFounderOfGroup
      */
@@ -501,7 +721,6 @@ class Client
      * @throws AuthException
      * @throws ClientException
      * @throws OAuthException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * Requires an OAuth token
      *
@@ -528,7 +747,6 @@ class Client
      * @throws ApiKeyException
      * @throws ClientException
      * @throws OAuthException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * Requires an OAuth token
      *
@@ -555,7 +773,6 @@ class Client
      * @throws ApiKeyException
      * @throws ClientException
      * @throws OAuthException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * Requires an OAuth token
      *
@@ -583,7 +800,6 @@ class Client
      * @throws ApiKeyException
      * @throws ClientException
      * @throws OAuthException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * Requires an OAuth token
      *
@@ -622,7 +838,6 @@ class Client
      * @throws ApiKeyException
      * @throws ClientException
      * @throws OAuthException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * Requires an OAuth token
      *
@@ -645,10 +860,7 @@ class Client
         $response = $this->request($this->buildRequestString('GroupV2',
             [$clanID, 'Members', 'Approve', $membershipType, $membershipID]), 'POST',
             [
-                'json' =>
-                    [
-                        'message' => ''
-                    ]
+                'message' => ''
             ], [PlatformErrorCodes::CLANAPPLICANTINCLANSONOWINVITED]);
 
         return new ClanApproveMember($clanID, $membershipType, $membershipID, $response['Response'], $response['ErrorCode'], $response['ErrorStatus'], $response['Message']);
@@ -664,7 +876,6 @@ class Client
      * @throws ApiKeyException
      * @throws ClientException
      * @throws OAuthException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * @todo The return is currently broken. I believe it should simply be if ErrorCode == 1 then return true
      */
@@ -685,11 +896,8 @@ class Client
         ///GroupV2/{groupId}/Members/DenyList/
         $response = $this->request($this->buildRequestString('GroupV2', [$clanID, 'Members', 'DenyList']), 'POST',
             [
-                'json' =>
-                    [
-                        'memberships' => [json_decode(json_encode($member))],
-                        'message' => ''
-                    ]
+                'memberships' => [json_decode(json_encode($member))],
+                'message' => ''
             ]);
 
         if ($response['ErrorCode'] == PlatformErrorCodes::SUCCESS) {
@@ -709,7 +917,6 @@ class Client
      * @throws ApiKeyException
      * @throws ClientException
      * @throws OAuthException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * Requires an OAuth token
      *
@@ -732,10 +939,7 @@ class Client
         $response = $this->request($this->buildRequestString('GroupV2',
             [$clanID, 'Members', 'IndividualInvite', $membershipType, $membershipID]), 'POST',
             [
-                'json' =>
-                    [
-                        'message' => ''
-                    ]
+                'message' => ''
             ]);
 
         if ($response['ErrorStatus'] == "Success") {
@@ -755,7 +959,6 @@ class Client
      * @throws ApiKeyException
      * @throws ClientException
      * @throws OAuthException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * Requires an OAuth token
      *
@@ -797,7 +1000,6 @@ class Client
      * @throws AuthException
      * @throws ClientException
      * @throws OAuthException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * Requires an OAuth token
      */
@@ -822,7 +1024,6 @@ class Client
      * @throws AuthException
      * @throws ClientException
      * @throws OAuthException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getProfile($membershipType, $membershipID, ...$components)
     {
@@ -866,7 +1067,6 @@ class Client
      * @throws AuthException
      * @throws ClientException
      * @throws OAuthException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getMobileWorldContentsPath($locale = "en")
     {
@@ -883,7 +1083,6 @@ class Client
      * @throws AuthException
      * @throws ClientException
      * @throws OAuthException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * @link https://bungie-net.github.io/multi/operation_get_User-GetBungieNetUserById.html#operation_get_User-GetBungieNetUserById
      */
@@ -901,7 +1100,6 @@ class Client
      * @throws AuthException
      * @throws ClientException
      * @throws OAuthException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getMembershipDataForCurrentUser()
     {
@@ -925,7 +1123,6 @@ class Client
      * @throws AuthException
      * @throws ClientException
      * @throws OAuthException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getBungieAccount($membershipType, $membershipID)
     {
@@ -945,7 +1142,6 @@ class Client
      * @throws AuthException
      * @throws ClientException
      * @throws OAuthException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      */
     public function getGroupV2User($membershipType, $membershipID)
     {
@@ -969,7 +1165,6 @@ class Client
      * @throws AuthException
      * @throws ClientException
      * @throws OAuthException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * Requires an OAuth token
      *
@@ -1073,7 +1268,6 @@ class Client
      * @throws AuthException
      * @throws ClientException
      * @throws OAuthException
-     * @throws \GuzzleHttp\Exception\GuzzleException
      *
      * @link https://bungie-net.github.io/multi/operation_get_User-GetPartnerships.html#operation_get_User-GetPartnerships
      */
@@ -1085,22 +1279,6 @@ class Client
             throw new ClientException('No results found');
         }
         return PublicPartnershipDetail::makeFromArray($response['Response'][0]);
-    }
-
-    /**
-     * Shim for testing the API
-     *
-     * @param string $responseFile
-     * @param int $statusCode HTTP Response Code (Defaults to 200)
-     */
-    public function setMock($responseFile, $statusCode = 200)
-    {
-        $mock = new MockHandler([
-            new Response($statusCode, ['Content-Type' => 'application/json'], file_get_contents($responseFile))
-        ]);
-
-        $handler = HandlerStack::create($mock);
-        $this->httpClient = new GuzzleClient(['handler' => $handler]);
     }
 
     /**
@@ -1172,6 +1350,45 @@ class Client
     public function setOauthToken(?string $oauthToken): Client
     {
         $this->oauthToken = $oauthToken;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getRetryOnRateLimit(): bool
+    {
+        return $this->retryOnRateLimit;
+    }
+
+    /**
+     * @param bool $retryOnRateLimit
+     * @return Client
+     */
+    public function setRetryOnRateLimit(bool $retryOnRateLimit = true): Client
+    {
+        $this->retryOnRateLimit = $retryOnRateLimit;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getMaxReplyAttempts(): int
+    {
+        return $this->maxReplyAttempts;
+    }
+
+    /**
+     * @param int $maxReplyAttempts
+     * @return Client
+     */
+    public function setMaxReplyAttempts(int $maxReplyAttempts = 5): Client
+    {
+        if (empty($maxReplyAttempts) || $maxReplyAttempts < 1) {
+            $maxReplyAttempts = 1;
+        }
+        $this->maxReplyAttempts = $maxReplyAttempts;
         return $this;
     }
 
@@ -1264,6 +1481,4 @@ class Client
         $this->appEmail = $appEmail ?? '';
         return $this;
     }
-
-
 }

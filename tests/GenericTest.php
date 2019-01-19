@@ -5,12 +5,7 @@
 
 namespace Destiny\Tests;
 
-use Destiny\Client;
-use Destiny\Enums\BungieMembershipType;
-use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Client as GuzzleClient;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * Class GenericTest
@@ -54,6 +49,32 @@ class GenericTest extends ClientTestCase
      *
      */
     public function testGetGlobalAlertsNoStreamingWithNoResults() {
+        $this->client->setMock(__DIR__ . '/static/getGlobalAlerts-NoAlerts.json');
+
+        $results = $this->client->getGlobalAlerts();
+
+        $this->assertEmpty($results);
+    }
+
+    /**
+     *
+     */
+    public function testGatewayErrorRetry() {
+        $this->client->setMock(__DIR__ . '/static/getGlobalAlerts-NoAlerts.json', 504);
+        $this->client->setMock(__DIR__ . '/static/getGlobalAlerts-NoAlerts.json', 504);
+        $this->client->setMock(__DIR__ . '/static/getGlobalAlerts-NoAlerts.json');
+
+        $results = $this->client->getGlobalAlerts();
+
+        $this->assertEmpty($results);
+    }
+
+    /**
+     *
+     */
+    public function testThrottleRetry() {
+        $this->client->buildMock('', 31, 'Throttled', 3, 'Throttled', null, 429);
+        $this->client->setMock(__DIR__ . '/static/throttled.json', 429);
         $this->client->setMock(__DIR__ . '/static/getGlobalAlerts-NoAlerts.json');
 
         $results = $this->client->getGlobalAlerts();

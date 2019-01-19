@@ -6,6 +6,7 @@ A PHP wrapper for the [Destiny 2 API](https://github.com/Bungie-net/api)
 [![Latest Unstable Version](https://poser.pugx.org/richard4339/destiny2-php/v/unstable)](https://packagist.org/packages/richard4339/destiny2-php)
 [![License](https://poser.pugx.org/richard4339/destiny2-php/license)](https://packagist.org/packages/richard4339/destiny2-php)
 [![composer.lock](https://poser.pugx.org/richard4339/destiny2-php/composerlock)](https://packagist.org/packages/richard4339/destiny2-php)
+[![Coverage Status](https://coveralls.io/repos/github/richard4339/destiny2-php/badge.svg?branch=master)](https://coveralls.io/github/richard4339/destiny2-php?branch=master)
 [![Build Status](https://travis-ci.org/richard4339/destiny2-php.svg?branch=master)](https://travis-ci.org/richard4339/destiny2-php)
 
 ## About
