@@ -17,11 +17,11 @@
   "require": {
     "php": ">=7.1",
     "ext-json": "*",
-    "php-http/client-common": "2.x-dev",
-    "php-http/discovery": "^1.4"
+    "php-http/client-common": "^1.8 || ^1.9 || ^2.0 ",
+    "php-http/discovery": "^1.5"
   },
   "require-dev": {
-    "php-http/guzzle6-adapter": "^2.0",
+    "php-http/guzzle6-adapter": "^1.1 || ^2.0",
     "phpunit/phpunit": "^7",
     "phpdocumentor/phpdocumentor": "2.*",
     "php-coveralls/php-coveralls": "^2.1",
