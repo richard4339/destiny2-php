@@ -334,9 +334,7 @@ class Client
             $method = 'GET';
         }
 
-        if (empty($this->httpClient)) {
-            $this->getHttpClient([], $this->httpClient, $this->messageFactory);
-        }
+        $this->getHttpClient([], $this->httpClient, $this->messageFactory);
 
         if (!empty($body)) {
             if (is_array($body)) {
