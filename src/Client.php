@@ -33,15 +33,11 @@ use Destiny\Objects\PublicPartnershipDetail;
 use Destiny\Objects\UserMembership;
 use Destiny\Objects\Vendor;
 use Destiny\Objects\VendorSale;
-use GuzzleHttp\Exception\ClientException as GuzzleClientException;
 use GuzzleHttp\Psr7\Response;
-use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\HandlerStack;
 use Http\Client\Common\Exception\ClientErrorException;
 use Http\Client\Common\HttpMethodsClient;
 use Http\Client\Common\Plugin;
 use Http\Client\Common\Plugin\AuthenticationPlugin;
-use Http\Client\Common\Plugin\BaseUriPlugin;
 use Http\Client\Common\Plugin\ContentTypePlugin;
 use Http\Client\Common\Plugin\ErrorPlugin;
 use Http\Client\Common\Plugin\HeaderDefaultsPlugin;
@@ -51,7 +47,6 @@ use Http\Client\Exception as HttpClientException;
 use Http\Client\HttpClient;
 use Http\Discovery\HttpClientDiscovery;
 use Http\Discovery\MessageFactoryDiscovery;
-use Http\Discovery\UriFactoryDiscovery;
 use Http\Message\Authentication\Bearer;
 use Http\Message\MessageFactory;
 use Http\Message\ResponseFactory;
@@ -60,6 +55,8 @@ use Psr\Http\Message\RequestInterface;
 /**
  * Class Client
  * @package Destiny
+ *
+ * @property Plugin[] $httpClientPlugins Extra (optional) plugins to apply to httpClient.
  *
  * Some of get functions do require an OAuth token for access. If you do not pass an OAuth token for functions that do
  * not require it, that is fine. However, if you pass an invalid OAuth token to ANY function regardless of its
@@ -268,11 +265,15 @@ class Client
      * @param string $method
      * @param array|null $extraParameters
      * @param int[]|null $allowedErrorCodes Some error codes are always a success (1). Some are always a failure (12, 2101). Some, like 699, are technically a success when called from certain endpoints.
+     *
      * @return mixed
+     *
      * @throws ApiKeyException
-     * @throws ClientException
-     * @throws OAuthException
      * @throws AuthException
+     * @throws ClientException
+     * @throws Exception
+     * @throws HttpClientException
+     * @throws OAuthException
      */
     protected function request($url, string $method = 'GET', array $extraParameters = null, array $allowedErrorCodes = null)
     {
@@ -307,7 +308,8 @@ class Client
     /**
      * @param string $url
      * @param string $method
-     * @param array|null $body
+     * @param string|array|null $body
+     *
      * @return \Psr\Http\Message\ResponseInterface
      *
      * @throws ApiKeyException
@@ -316,11 +318,15 @@ class Client
      * @throws HttpClientException
      * @throws OAuthException
      */
-    protected function internalRequest(string $url, string $method = 'GET', array $body = null)
+    protected function internalRequest(string $url, string $method = 'GET', $body = null, array $headers = null)
     {
 
         if (empty($this->apiKey)) {
             throw new ApiKeyException("API Key is not set");
+        }
+
+        if (empty($headers)) {
+            $headers = [];
         }
 
         $method = strtoupper($method);
@@ -328,10 +334,18 @@ class Client
             $method = 'GET';
         }
 
-        $this->getHttpClient([], $this->httpClient, $this->messageFactory);
+        if (empty($this->httpClient)) {
+            $this->getHttpClient([], $this->httpClient, $this->messageFactory);
+        }
+
+        if (!empty($body)) {
+            if (is_array($body)) {
+                $body = json_encode($body);
+            }
+        }
 
         try {
-            $response = $this->httpClient->send($method, $url, [], json_encode($body));
+            $response = $this->httpClient->send($method, $url, $headers, $body);
         } catch (ClientErrorException $x) {
             switch ($x->getCode()) {
                 case 401:
@@ -356,8 +370,8 @@ class Client
      * @param Plugin[] $plugins
      * @param HttpClient|null $httpClient
      * @param MessageFactory|null $messageFactory
+     *
      * @return HttpMethodsClient
-     * @throws Exception
      */
     protected function getHttpClient(array $plugins = [], ?HttpClient $httpClient = null, ?MessageFactory $messageFactory = null): HttpMethodsClient
     {
@@ -388,6 +402,10 @@ class Client
         }
         $plugins[] = new ErrorPlugin();
 
+        if (!empty($this->httpClientPlugins)) {
+            $plugins = array_merge($plugins, $this->httpClientPlugins);
+        }
+
         $pluginClient = new PluginClient($httpClient, $plugins);
 
         if (!$messageFactory) {
@@ -400,66 +418,14 @@ class Client
     }
 
     /**
-     * Shim for testing the API by file
+     * @param HttpMethodsClient|null $httpClient
      *
-     * @param string $responseFile
-     * @param int $statusCode HTTP Response Code (Defaults to 200)
-     * @param MessageFactory|null $messageFactory
+     * @return Client
      */
-    public function setMock($responseFile, $statusCode = 200, ?MessageFactory $messageFactory = null)
+    public function setHttpClient(HttpMethodsClient $httpClient = null): Client
     {
-        $this->setupMock($messageFactory);
-
-        $response = $this->messageFactory->createResponse($statusCode, 'REASON?', [], file_get_contents($responseFile));
-
-        //$response = $this->creat
-        $this->httpClient->addResponse($response);
-//        $mock = new MockHandler([
-//            new Response($statusCode, ['Content-Type' => 'application/json'], file_get_contents($responseFile))
-//        ]);
-//
-//        $handler = HandlerStack::create($mock);
-//        $this->httpClient = new GuzzleClient(['handler' => $handler]);
-    }
-
-    /**
-     * Shim for testing the API by building a response
-     *
-     * @param string $responseFile
-     * @param int $statusCode HTTP Response Code (Defaults to 200)
-     * @param MessageFactory|null $messageFactory
-     */
-    public function buildMock($response, int $errorCode = 1, string $errorStatus = 'Success', int $throttleSeconds = 0, string $message = 'Ok', $messageData = null, $statusCode = 200, ?MessageFactory $messageFactory = null)
-    {
-        $this->setupMock($messageFactory);
-        
-        $body = json_encode([
-            "Response" => $response,
-          "ErrorCode" => $errorCode,
-          "ThrottleSeconds" => $throttleSeconds,
-          "ErrorStatus" => $errorStatus,
-          "Message" => $message,
-          "MessageData" => $messageData
-        ]);
-
-        $httpResponse = $this->messageFactory->createResponse($statusCode, 'REASON?', [], $body);
-
-        $this->httpClient->addResponse($httpResponse);
-
-    }
-
-    /**
-     * @param MessageFactory|null $messageFactory
-     */
-    protected function setupMock(MessageFactory $messageFactory = null)
-    {
-        if(empty($this->httpClient)) {
-            $this->httpClient = new \Http\Mock\Client();
-        }
-
-        if (!$messageFactory) {
-            $this->messageFactory = MessageFactoryDiscovery::find();
-        }        
+        $this->httpClient = $httpClient;
+        return $this;
     }
 
     /**
@@ -611,6 +577,69 @@ class Client
         }
         $url = rtrim($url, '?');
         return $url;
+    }
+
+    /**
+     * Shim for testing the API by file
+     *
+     * @param string $responseFile
+     * @param int $statusCode HTTP Response Code (Defaults to 200)
+     * @param MessageFactory|null $messageFactory
+     */
+    public function setMock($responseFile, $statusCode = 200, ?MessageFactory $messageFactory = null)
+    {
+        $this->setupMock($messageFactory);
+
+        $response = $this->messageFactory->createResponse($statusCode, 'REASON?', [], file_get_contents($responseFile));
+
+        //$response = $this->creat
+        $this->httpClient->addResponse($response);
+//        $mock = new MockHandler([
+//            new Response($statusCode, ['Content-Type' => 'application/json'], file_get_contents($responseFile))
+//        ]);
+//
+//        $handler = HandlerStack::create($mock);
+//        $this->httpClient = new GuzzleClient(['handler' => $handler]);
+    }
+
+    /**
+     * @param MessageFactory|null $messageFactory
+     */
+    protected function setupMock(MessageFactory $messageFactory = null)
+    {
+        if (empty($this->httpClient)) {
+            $this->httpClient = new \Http\Mock\Client();
+        }
+
+        if (!$messageFactory) {
+            $this->messageFactory = MessageFactoryDiscovery::find();
+        }
+    }
+
+    /**
+     * Shim for testing the API by building a response
+     *
+     * @param string $responseFile
+     * @param int $statusCode HTTP Response Code (Defaults to 200)
+     * @param MessageFactory|null $messageFactory
+     */
+    public function buildMock($response, int $errorCode = 1, string $errorStatus = 'Success', int $throttleSeconds = 0, string $message = 'Ok', $messageData = null, $statusCode = 200, ?MessageFactory $messageFactory = null)
+    {
+        $this->setupMock($messageFactory);
+
+        $body = json_encode([
+            "Response" => $response,
+            "ErrorCode" => $errorCode,
+            "ThrottleSeconds" => $throttleSeconds,
+            "ErrorStatus" => $errorStatus,
+            "Message" => $message,
+            "MessageData" => $messageData
+        ]);
+
+        $httpResponse = $this->messageFactory->createResponse($statusCode, 'REASON?', [], $body);
+
+        $this->httpClient->addResponse($httpResponse);
+
     }
 
     /**
@@ -1476,4 +1505,6 @@ class Client
         $this->appEmail = $appEmail ?? '';
         return $this;
     }
+
+
 }
