@@ -367,17 +367,12 @@ class Client
         if (!$httpClient) {
             $httpClient = HttpClientDiscovery::find();
         }
+
         $plugins[] = new ContentTypePlugin();
         $plugins[] = new HeaderDefaultsPlugin([
             'User-Agent' => $userAgent,
             'X-Api-Key' => $this->apiKey
         ]);
-
-        if (empty($this->uri)) {
-            throw new Exception('Bungie API URI is not set.');
-        }
-
-        $plugins[] = new BaseUriPlugin(UriFactoryDiscovery::find()->createUri($this->uri));
 
         if (!empty($this->oauthToken)) {
             $authentication = new Bearer($this->oauthToken);
