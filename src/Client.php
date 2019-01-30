@@ -14,6 +14,7 @@ use Destiny\Enums\BungieMembershipType;
 use Destiny\Enums\DestinyComponentType;
 use Destiny\Enums\GroupType;
 use Destiny\Enums\PlatformErrorCodes;
+use Destiny\Enums\RuntimeGroupMemberType;
 use Destiny\Exceptions\AuthException;
 use Destiny\Exceptions\ClientException;
 use Destiny\Exceptions\ApiKeyException;
@@ -77,18 +78,19 @@ use Psr\Http\Message\RequestInterface;
  * POST: GroupV2.EditFounderOptions
  * POST: GroupV2.AddOptionalConversation
  * POST: GroupV2.EditOptionalConversation
- * POST: GroupV2.EditGroupMembership
  * POST: GroupV2.BanMember
  * POST: GroupV2.UnbanMember
  * POST: GroupV2.AbdicateFoundership
  * POST: GroupV2.RequestGroupMembership
  * POST: GroupV2.RescindGroupMembership
+ * GET: GroupV2.GetGroupsForMember
+ * GET: GroupV2.GetPotentialGroupsForMember
+ *
+ * Note that the methods below have individual calls available
  * POST: GroupV2.ApproveAllPending
  * POST: GroupV2.DenyAllPending
  * POST: GroupV2.ApprovePendingForList
- * POST: GroupV2.DenyPendingForList Note: This is implemented but only accepts one member at a time
- * GET: GroupV2.GetGroupsForMember
- * GET: GroupV2.GetPotentialGroupsForMember
+ * POST: GroupV2.DenyPendingForList
  *
  */
 class Client
@@ -1013,6 +1015,58 @@ class Client
             throw new ClientException($response['Message'], $response['ErrorCode'], $response['ThrottleSeconds'],
                 $response['ErrorStatus']);
         }
+    }
+
+    /**
+     * @param int $clanID
+     * @param int|string $membershipType
+     * @param int|string $membershipID
+     * @param int|string $memberType
+     *
+     * @return bool
+     *
+     * @throws ApiKeyException
+     * @throws AuthException
+     * @throws ClientException
+     * @throws Exception
+     * @throws HttpClientException
+     * @throws OAuthException
+     *
+     * Requires an OAuth token
+     *
+     * @link https://bungie-net.github.io/multi/operation_post_GroupV2-EditGroupMembership.html#operation_post_GroupV2-EditGroupMembership
+     */
+    public function clanEditMembership(int $clanID, $membershipType, $membershipID, $memberType) {
+        if (empty($this->oauthToken)) {
+            throw new OAuthException();
+        }
+
+        // Check to see if the supplied membershipType is a number. If so, convert it to the label
+        if (is_int($membershipType)) {
+            $membershipType = BungieMembershipType::getLabel($membershipType);
+        }
+        if ($membershipType == "None" || $membershipType == "") {
+            throw new ClientException('An invalid MembershipType was supplied.');
+        }
+
+        // Check to see if the supplied memberType is a number. If so, convert it to the label.
+        if(is_int($memberType)) {
+            $memberType = RuntimeGroupMemberType::getLabel($memberType);
+        }
+        if ($memberType == "None" || $memberType == "") {
+            throw new ClientException('An invalid MemberType was supplied.');
+        }
+
+        $response = $this->request($this->buildRequestString('GroupV2',
+            [$clanID, 'Members', $membershipType, $membershipID, 'SetMembershipType', $memberType]), 'POST');
+
+        if ($response['ErrorStatus'] == "Success") {
+            return true;
+        } else {
+            throw new ClientException($response['Message'], $response['ErrorCode'], $response['ThrottleSeconds'],
+                $response['ErrorStatus']);
+        }
+
     }
 
     /**
