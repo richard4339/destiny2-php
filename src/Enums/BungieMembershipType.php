@@ -38,7 +38,17 @@ class BungieMembershipType implements Enum
     /**
      *
      */
+    const TIGERSTEAM = 3;
+
+    /**
+     *
+     */
     const TIGERBLIZZARD = 4;
+
+    /**
+     *
+     */
+    const TIGERSTADIA = 5;
 
     /**
      *
@@ -56,7 +66,8 @@ class BungieMembershipType implements Enum
      * @param int $type
      * @return string
      */
-    public static function getLabel($type) {
+    public static function getLabel($type)
+    {
         switch ($type) {
             case self::ALL:
                 return "All";
@@ -70,8 +81,14 @@ class BungieMembershipType implements Enum
             case self::TIGERPSN:
                 return "TigerPSN";
                 break;
+            case self::TIGERSTEAM:
+                return "TigerSteam";
+                break;
             case self::TIGERBLIZZARD:
                 return "TigerBlizzard";
+                break;
+            case self::TIGERSTADIA:
+                return "TigerStadia";
                 break;
             case self::TIGERDEMON:
                 return "TigerDemon";
