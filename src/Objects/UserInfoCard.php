@@ -30,6 +30,8 @@ use JsonSerializable;
  * @method string membershipId() Membership ID as they user is known in the Accounts service
  * The API reference states this is an int but it is returned as a string
  * @method string displayName() Display Name the player has chosen for themselves. The display name is optional when the data type is used as input to a platform API.
+ * @method int crossSaveOverride() If there is a cross save override in effect, this value will tell you the type that is overridding this one.
+ * @method int[] applicableMembershipTypes() The list of Membership Types indicating the platforms on which this Membership can be used. Not in Cross Save = its original membership type. Cross Save Primary = Any membership types it is overridding, and its original membership type Cross Save Overridden = Empty list
  */
 class UserInfoCard extends AbstractResource implements JsonSerializable
 {
